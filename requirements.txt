@@ -1,0 +1,15 @@
+# tests
+pytest
+pylint
+# debug
+ipdb
+# Notebooks
+jupyterlab
+# base packages
+numpy
+pandas
+# data-viz
+matplotlib
+seaborn
+# data-science
+scikit-learn
