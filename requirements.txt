@@ -13,3 +13,6 @@ matplotlib
 seaborn
 # data-science
 scikit-learn
+tensorflow==2.10.0
+# geofiles
+geopandas
