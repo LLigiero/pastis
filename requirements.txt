@@ -13,3 +13,4 @@ matplotlib
 seaborn
 # data-science
 scikit-learn
+tensorflow
