@@ -5,6 +5,28 @@ import re
 import tensorflow as tf
 import math
 from pastis.params import *
+import geopandas as gpd
+
+def load_geojson()-> gpd:
+    ''' function to load the metadata.geojson, which contain all of the
+        needed informations, to synchronize our datas
+    '''
+    metadata= gpd.read_file(os.path.join(META_PATH))
+    metadata.index = metadata["ID_PATCH"].astype(int)
+    metadata.sort_index(inplace=True)
+    return metadata
+
+def index_date(metadata:gpd,patch_id:int, mono_date:int=20190816)->int:
+    ''' Obtain the index of the nearest date of S2 satelite Time Series
+    metadata = metadata.geojson (cf load_geojson function)
+    patch_id = S2 satelite number
+    mono_date = nearest date we want to observe
+    '''
+    date_values= np.array(list(metadata['dates-S2'][10000].values()))
+    date_values= np.array(list(metadata['dates-S2'][patch_id].values()))
+    #mono_date=np.array(mono_date)
+    index = abs(date_values - mono_date).argmin()
+    return index
 
 def normalize_patch_spectra(time_series:np.array) -> np.array:
     """Utility function to normalize the Sentinel-2 patch spectra.
