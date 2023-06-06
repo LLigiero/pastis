@@ -1,7 +1,7 @@
 from pastis.ml_logic.utils import load_geojson
 
-from ml_logic.data import PastisDataset
-from ml_logic.baseline_model import baseline_unet_model, compile_model, train_model
+from pastis.ml_logic.data import PastisDataset
+from pastis.ml_logic.baseline_model import baseline_unet_model, compile_model, train_model
 from sklearn.model_selection import train_test_split
 
 

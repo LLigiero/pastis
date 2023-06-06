@@ -11,6 +11,8 @@ from keras.losses import CategoricalCrossentropy
 from keras.callbacks import EarlyStopping
 from keras.metrics import IoU, MeanIoU
 
+from pastis.ml_logic.metrics import m_iou
+
 # ----- CONVOLUTIONAL BLOCKS -----
 
 def down_block(inputs=None, filters=64, kernel_size=(3, 3), padding="same", strides=1, maxpool=True):
@@ -121,10 +123,11 @@ def compile_model(model: Model, learning_rate=0.05) -> Model:
 
     optimizer = optimizers.Adam(learning_rate=learning_rate)
     loss = CategoricalCrossentropy()
-    iou = IoU(NUM_CLASSES, list(range(0, NUM_CLASSES)))
-    miou = MeanIoU(NUM_CLASSES)
-    metrics = ['accuracy', iou, miou]
-    model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
+    # iou = IoU(NUM_CLASSES, list(range(0, NUM_CLASSES)), sparse_y_true=False, sparse_y_pred=False, name='IoU')
+    # miou = MeanIoU(NUM_CLASSES)
+    miou = m_iou(NUM_CLASSES)
+    metrics = ['acc', miou.mean_iou]
+    model.compile(loss=loss, optimizer=optimizer, metrics=metrics, run_eagerly=True)
 
     print("✅ Model compiled")
 
