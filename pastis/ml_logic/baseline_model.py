@@ -1,9 +1,15 @@
+import numpy as np
 
-import tensorflow as tf
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Conv2D, Dropout, BatchNormalization
-from tensorflow.keras.layers import Concatenante, LeakyRelu, Activation, MaxPool2D
-from tensorflow.keras.activations import *
+from tensorflow import keras
+from keras.models import Model
+from keras.layers import Input, Conv2D, Dropout, BatchNormalization, UpSampling2D
+from keras.layers import Concatenate, LeakyReLU, MaxPool2D
+from keras.activations import *
+
+from keras import optimizers
+from keras.losses import CategoricalCrossentropy
+from keras.callbacks import EarlyStopping
+from keras.metrics import IoU, MeanIoU
 
 # ----- CONVOLUTIONAL BLOCKS -----
 
@@ -12,15 +18,16 @@ def down_block(inputs=None, filters=64, kernel_size=(3, 3), padding="same", stri
     # 1st convolution layer
     conv1 = Conv2D(filters, kernel_size, padding=padding, strides=strides)(inputs)
     conv1 = BatchNormalization()(conv1)
-    conv1 = LeakyRelu()(conv1)
+    conv1 = LeakyReLU()(conv1)
 
     # 2nd convolution layer
     conv2 = Conv2D(filters, kernel_size, padding=padding, strides=strides)(conv1)
     conv2 = BatchNormalization()(conv2)
-    conv2 = LeakyRelu()(conv2)
+    conv2 = LeakyReLU()(conv2)
 
     # Max Pool layer
     max_pool = MaxPool2D((2, 2))(conv2)
+
     if maxpool==True:
         return conv2, max_pool
     else:
@@ -34,17 +41,17 @@ def up_block(inputs, skip_connection, filters=64, kernel_size=(3, 3), padding="s
     up_sampling = UpSampling2D((2, 2))(inputs)
 
     # Concatenate
-    concat = Concatenate()(axis=3, [up_sampling, skip_connection])
+    concat = Concatenate(axis=3)([up_sampling, skip_connection]) # TODO check l'axis
 
     # 1st convolution layer
     conv1 = Conv2D(filters, kernel_size, padding=padding, strides=strides)(concat)
     conv1 = BatchNormalization()(conv1)
-    conv1 = LeakyRelu()(conv1)
+    conv1 = LeakyReLU()(conv1)
 
     # 2nd convolution layer
     conv2 = Conv2D(filters, kernel_size, padding=padding, strides=strides)(conv1)
     conv2 = BatchNormalization()(conv1)
-    conv2 = LeakyRelu()(conv1)
+    conv2 = LeakyReLU()(conv1)
 
     return conv2
 
@@ -62,7 +69,7 @@ def bottleneck(inputs, filters, kernel_size=(3, 3), padding="same", strides=1):
 # Img_heigth = 128
 # Img_channel = 10
 
-def baseline_unet_model(input_shape=(128,128,10), dropout=0):
+def baseline_unet_model(input_shape:tuple=(128,128,10), dropout:float=0) -> Model:
     '''U-net model architecture has 3 parts :
             - down_block (contracting block),
             - bottelneck (bridge),
@@ -100,4 +107,90 @@ def baseline_unet_model(input_shape=(128,128,10), dropout=0):
     model = Model(inputs, outputs, name='baseline_unet')
     model.summary()
 
+    print("✅ Model initialized")
+
     return model
+
+# ----- COMPILE MODEL -----
+
+def compile_model(model: Model, learning_rate=0.05) -> Model:
+    """
+    Compile the U-net model
+    """
+    NUM_CLASSES = 20 # à déplacer dans .env
+
+    optimizer = optimizers.Adam(learning_rate=learning_rate)
+    loss = CategoricalCrossentropy()
+    iou = IoU(NUM_CLASSES, list(range(0, NUM_CLASSES)))
+    miou = MeanIoU(NUM_CLASSES)
+    metrics = ['accuracy', iou, miou]
+    model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
+
+    print("✅ Model compiled")
+
+    return model
+
+# ----- TRAIN MODEL -----
+
+def train_model(
+        model: Model,
+        train_ds,
+        batch_size=256,
+        patience=2,
+        validation_ds=None, # overrides validation_split
+    ) -> tuple[Model, dict]:
+    """
+    Fit the model and return a tuple (fitted_model, history)
+    """
+
+    es = EarlyStopping(
+        monitor="val_loss",
+        patience=patience,
+        restore_best_weights=True,
+        verbose=1
+    )
+
+    if validation_ds :
+        history = model.fit(
+            train_ds,
+            validation_data=validation_ds,
+            epochs=1,
+            batch_size=batch_size,
+            callbacks=[es],
+            verbose=1
+        )
+    else :
+        history = model.fit(
+            train_ds,
+            epochs=1,
+            batch_size=batch_size,
+            verbose=1
+        )
+    print(f"✅ Model trained with IuO: {history.history()}")
+
+    #print(f"✅ Model trained with IuO: {round(np.min(history.history['IuO']), 2)}")
+
+    return model, history
+
+
+# ----- EVALUATE MODEL -----
+
+def evaluate_model(
+        model: Model,
+        test_ds,
+        batch_size=64
+    ) -> tuple[Model, dict]:
+    """
+    Evaluate trained model performance on the dataset
+    """
+    metrics = model.evaluate(
+        test_ds,
+        batch_size=batch_size,
+        verbose=0,
+        # callbacks=None,
+        return_dict=True
+    )
+
+    print(f"✅ Model evaluated, IuO: {round(metrics['IuO'], 2)}")
+
+    return metrics

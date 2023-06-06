@@ -1,10 +1,5 @@
-from pastis.ml_logic.utils import load_geojson
-
-from ml_logic.data import PastisDataset
 from ml_logic.baseline_model import baseline_unet_model, compile_model, train_model
 from sklearn.model_selection import train_test_split
-
-
 
 # Instantiate class instance
 pastis = PastisDataset()
@@ -26,11 +21,9 @@ patience = 2
 
 model, history = train_model(
         model,
-        pastis.tf_dataset,
+        train_ds,
         batch_size=batch_size,
         patience=patience,
     )
 
-
-if __name__ == '__main__':
-    METADATA=load_geojson()
+# ----- EVALUATE MODEL -----
