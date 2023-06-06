@@ -22,7 +22,6 @@ def index_date(metadata:gpd,patch_id:int, mono_date:int=20190816)->int:
     patch_id = S2 satelite number
     mono_date = nearest date we want to observe
     '''
-    date_values= np.array(list(metadata['dates-S2'][10000].values()))
     date_values= np.array(list(metadata['dates-S2'][patch_id].values()))
     #mono_date=np.array(mono_date)
     index = abs(date_values - mono_date).argmin()
@@ -78,7 +77,7 @@ def pad_time_series(time_series:np.array, size:int) -> np.array :
     return pad_result
 
 
-def process_path(file_path:str, mono_date:bool) -> tf :
+def process_path(metadata:gpd, file_path:str, mono_date:bool) -> tf :
     """
     Preprocess time series.
     Output: X, y in tf.tensor for model
@@ -87,6 +86,11 @@ def process_path(file_path:str, mono_date:bool) -> tf :
     path = tf.get_static_value(file_path).decode("utf-8")
     file_name = path.split("/")[-1]
     patch_id = int(re.search(r"_\d*", file_name).group(0)[1:])
+
+    #mono_date en booléen normalement int 20190816 ???
+    index= index_date(metadata,patch_id, mono_date)
+
+
     x = np.load(path)
     x = normalize_patch_spectra(x)
     print(x.shape)
@@ -97,6 +101,6 @@ def process_path(file_path:str, mono_date:bool) -> tf :
     print(x.shape)
 
     return (
-        tf.convert_to_tensor(x.astype(np.float32))[0],
-        tf.convert_to_tensor(np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy"))[0],
+        tf.convert_to_tensor(x.astype(np.float32))[index],
+        tf.convert_to_tensor(np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy"))[index],
             )

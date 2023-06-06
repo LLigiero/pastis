@@ -2,8 +2,6 @@ import tensorflow as tf
 from pastis.params import DATA_PATH
 from pastis.ml_logic.utils import process_path, load_geojson
 import pathlib
-import numpy as np
-import re
 
 
 class PastisDataset:
@@ -12,6 +10,7 @@ class PastisDataset:
     """
 
     def __init__(self, mono_date=True) -> None:
+
         metadata=load_geojson()
 
         data_path = pathlib.Path(DATA_PATH)
@@ -21,3 +20,4 @@ class PastisDataset:
         self.tf_dataset = self.tf_dataset.map(
             lambda x: tf.py_function(process_path, inp=[x, mono_date], Tout=[tf.float32, tf.uint8])
         )
+        ### Comment je passe metadata dans la fonction process_path, qui est elle meme dans une fonction lambda ?
