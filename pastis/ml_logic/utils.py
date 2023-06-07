@@ -109,11 +109,11 @@ def process_path(file_path:str, mono_date:int,) -> tf :
         x = pad_time_series(x,TIME_SERIES_LENGTH)
         x = x.swapaxes(1,3).swapaxes(1,2)
 
-  
+
     target_semantic = np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy")[0]
     target_semantic_hot = one_hot(target_semantic, NUM_CLASSES)
 
     x = tf.convert_to_tensor(x.astype(np.float32))
-    y = tf.convert_to_tensor(target_semantic_hot)
+    y = tf.convert_to_tensor(target_semantic_hot.astype(np.uint8))
 
     return x,y
