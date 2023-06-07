@@ -81,6 +81,12 @@ def pad_time_series(time_series:np.array, size:int) -> np.array :
 
     return pad_result
 
+def one_hot(y:np.array, num_classes:int) -> np.array:
+    """
+    One Hot encoder using numpy. Equivalent to to_categorcial from keras.
+    from keras.utils.np_utils import to_categorical
+    """
+    return np.squeeze(np.eye(num_classes)[y])
 
 def process_path(file_path:str, mono_date:int,) -> tf :
     """
@@ -95,16 +101,19 @@ def process_path(file_path:str, mono_date:int,) -> tf :
 
     x = np.load(path)
     x = normalize_patch_spectra(x)
+
     if mono_date!=0:
         index= index_date(patch_id, mono_date)
         x = x[index].swapaxes(0,1).swapaxes(1,2)
-
-
     else:
         x = pad_time_series(x,TIME_SERIES_LENGTH)
         x = x.swapaxes(1,3).swapaxes(1,2)
 
-    x = tf.convert_to_tensor(x.astype(np.float32))
-    y = tf.convert_to_tensor(np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy"))
+  
+    target_semantic = np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy")[0]
+    target_semantic_hot = one_hot(target_semantic, NUM_CLASSES)
 
-    return x,y[0]
+    x = tf.convert_to_tensor(x.astype(np.float32))
+    y = tf.convert_to_tensor(target_semantic_hot)
+
+    return x,y

@@ -10,6 +10,7 @@ META_PATH = os.getenv("META_PATH")
 TIME_SERIES_LENGTH = 70
 FOLDS = None
 
+NUM_CLASSES = 20
 LABEL_NAMES = {
   "0": "Background",
   "1": "Meadow",

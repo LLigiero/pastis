@@ -14,3 +14,4 @@ seaborn
 # data-science
 scikit-learn
 tensorflow
+geopandas
