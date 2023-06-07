@@ -78,6 +78,7 @@ def process_path(file_path:str, mono_date:bool) -> tf :
 
     x = x.swapaxes(1,3).swapaxes(1,2)
 
+
     target_semantic = np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy")[0]
     target_semantic_hot = one_hot(target_semantic, NUM_CLASSES)
 
