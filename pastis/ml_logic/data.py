@@ -34,7 +34,7 @@ class PastisDataset:
                 process_path, inp=[path, mono_date], Tout=[tf.float32, tf.uint8]
             )
         )
-        self.test_dataset = tf.data.Dataset.list_files(files_list["val"])
+        self.test_dataset = tf.data.Dataset.list_files(files_list["test"])
         self.test_dataset = self.test_dataset.map(
             lambda path: tf.py_function(
                 process_path, inp=[path, mono_date], Tout=[tf.float32, tf.uint8]
