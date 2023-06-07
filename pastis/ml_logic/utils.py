@@ -5,6 +5,32 @@ import re
 import tensorflow as tf
 import math
 from pastis.params import *
+import geopandas as gpd
+
+
+
+def load_geojson()-> gpd:
+    ''' function to load the metadata.geojson, which contain all of the
+        needed informations, to synchronize our datas
+    '''
+    metadata= gpd.read_file(META_PATH)
+    metadata.index = metadata["ID_PATCH"].astype(int)
+    metadata.sort_index(inplace=True)
+    return metadata
+
+METADATA=load_geojson()
+
+
+def index_date(patch_id:int, mono_date:int=20190816)->int:
+    ''' Obtain the index of the nearest date of S2 satelite Time Series
+    metadata = metadata.geojson (cf load_geojson function)
+    patch_id = S2 satelite number
+    mono_date = nearest date we want to observe
+    '''
+    date_values= np.array(list(METADATA['dates-S2'][patch_id].values()))
+    #mono_date=np.array(mono_date)
+    index = np.abs(date_values - mono_date).argmin()
+    return index
 
 def normalize_patch_spectra(time_series:np.array) -> np.array:
     """Utility function to normalize the Sentinel-2 patch spectra.
@@ -62,7 +88,7 @@ def one_hot(y:np.array, num_classes:int) -> np.array:
     """
     return np.squeeze(np.eye(num_classes)[y])
 
-def process_path(file_path:str, mono_date:bool) -> tf :
+def process_path(file_path:str, mono_date:int,) -> tf :
     """
     Preprocess time series.
     Output: X, y in tf.tensor for model
@@ -71,18 +97,23 @@ def process_path(file_path:str, mono_date:bool) -> tf :
     path = tf.get_static_value(file_path).decode("utf-8")
     file_name = path.split("/")[-1]
     patch_id = int(re.search(r"_\d*", file_name).group(0)[1:])
+
+
     x = np.load(path)
     x = normalize_patch_spectra(x)
-    if not mono_date:
+
+    if mono_date!=0:
+        index= index_date(patch_id, mono_date)
+        x = x[index].swapaxes(0,1).swapaxes(1,2)
+    else:
         x = pad_time_series(x,TIME_SERIES_LENGTH)
+        x = x.swapaxes(1,3).swapaxes(1,2)
 
-    x = x.swapaxes(1,3).swapaxes(1,2)
-
-
+  
     target_semantic = np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy")[0]
     target_semantic_hot = one_hot(target_semantic, NUM_CLASSES)
 
-    return (
-        tf.convert_to_tensor(x.astype(np.float32))[0],
-        tf.convert_to_tensor(target_semantic_hot),
-            )
+    x = tf.convert_to_tensor(x.astype(np.float32))
+    y = tf.convert_to_tensor(target_semantic_hot)
+
+    return x,y
