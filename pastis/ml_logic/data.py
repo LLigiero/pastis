@@ -2,8 +2,6 @@ import tensorflow as tf
 from pastis.params import DATA_PATH
 from pastis.ml_logic.utils import process_path
 import pathlib
-import numpy as np
-import re
 
 
 class PastisDataset:

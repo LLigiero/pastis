@@ -5,6 +5,7 @@ DATA_PATH = os.getenv("DATA_PATH")
 TIME_SERIES_LENGTH = 70
 FOLDS = None
 
+NUM_CLASSES = 20
 LABEL_NAMES = {
   "0": "Background",
   "1": "Meadow",

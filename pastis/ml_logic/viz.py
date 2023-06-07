@@ -48,9 +48,10 @@ def plot_semantic(patch_id):
     cm = matplotlib.cm.get_cmap('tab20')
     def_colors = cm.colors
 
-    cus_colors = ['k'] + [def_colors[i] for i in range(1,20)]+['w']
+    cus_colors = ['k'] + [def_colors[i] for i in range(1,20)] + ['w']
     semantic_cmap = matplotlib.colors.ListedColormap(colors = cus_colors, name='agri',N=21)
 
     target = np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy")[0]
     plt.imshow(target, cmap= semantic_cmap, vmin=0, vmax=19)
     plt.title('Semantic labels')
+    #plt.legend(LABEL_NAMES)
