@@ -7,24 +7,29 @@ import math
 from pastis.params import *
 import geopandas as gpd
 
+
+
 def load_geojson()-> gpd:
     ''' function to load the metadata.geojson, which contain all of the
         needed informations, to synchronize our datas
     '''
-    metadata= gpd.read_file(os.path.join(META_PATH))
+    metadata= gpd.read_file(META_PATH)
     metadata.index = metadata["ID_PATCH"].astype(int)
     metadata.sort_index(inplace=True)
     return metadata
 
-def index_date(metadata:gpd,patch_id:int, mono_date:int=20190816)->int:
+METADATA=load_geojson()
+
+
+def index_date(patch_id:int, mono_date:int=20190816)->int:
     ''' Obtain the index of the nearest date of S2 satelite Time Series
     metadata = metadata.geojson (cf load_geojson function)
     patch_id = S2 satelite number
     mono_date = nearest date we want to observe
     '''
-    date_values= np.array(list(metadata['dates-S2'][patch_id].values()))
+    date_values= np.array(list(METADATA['dates-S2'][patch_id].values()))
     #mono_date=np.array(mono_date)
-    index = abs(date_values - mono_date).argmin()
+    index = np.abs(date_values - mono_date).argmin()
     return index
 
 def normalize_patch_spectra(time_series:np.array) -> np.array:
@@ -77,7 +82,7 @@ def pad_time_series(time_series:np.array, size:int) -> np.array :
     return pad_result
 
 
-def process_path(metadata:gpd, file_path:str, mono_date:bool) -> tf :
+def process_path(file_path:str, mono_date:int,) -> tf :
     """
     Preprocess time series.
     Output: X, y in tf.tensor for model
@@ -87,20 +92,19 @@ def process_path(metadata:gpd, file_path:str, mono_date:bool) -> tf :
     file_name = path.split("/")[-1]
     patch_id = int(re.search(r"_\d*", file_name).group(0)[1:])
 
-    #mono_date en booléen normalement int 20190816 ???
-    index= index_date(metadata,patch_id, mono_date)
-
 
     x = np.load(path)
     x = normalize_patch_spectra(x)
-    print(x.shape)
-    if not mono_date:
+    if mono_date!=0:
+        index= index_date(patch_id, mono_date)
+        x = x[index].swapaxes(0,1).swapaxes(1,2)
+
+
+    else:
         x = pad_time_series(x,TIME_SERIES_LENGTH)
+        x = x.swapaxes(1,3).swapaxes(1,2)
 
-    x = x.swapaxes(1,3).swapaxes(1,2)
-    print(x.shape)
+    x = tf.convert_to_tensor(x.astype(np.float32))
+    y = tf.convert_to_tensor(np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy"))
 
-    return (
-        tf.convert_to_tensor(x.astype(np.float32))[index],
-        tf.convert_to_tensor(np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy"))[index],
-            )
+    return x,y[0]
