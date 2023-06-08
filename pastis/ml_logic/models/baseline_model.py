@@ -100,7 +100,8 @@ class Unet_baseline():
             batch_size=32, # TO DO check batch_size
             patience=2,
             validation_ds=None, # overrides validation_split
-        ) -> tuple[Model, dict]:
+
+        ) -> tuple[Model]:
         """
         Fit the model and return a tuple (fitted_model, history)
         """
@@ -113,8 +114,8 @@ class Unet_baseline():
         )
 
         self.history = self.model.fit(
-            train_ds,
-            validation_data=validation_ds,
+            train_ds.batch(batch_size),
+            validation_data=validation_ds.batch(batch_size),
             epochs=epochs,
             batch_size=batch_size,
             callbacks=[es],
@@ -139,18 +140,17 @@ class Unet_baseline():
             self,
             test_ds,
             verbose=0,
-            batch_size=64,
+            batch_size=32,
             return_dict=True
         ) -> tuple[Model, dict]:
         """
         Evaluate trained model performance on the test dataset
         """
         self.metrics = self.model.evaluate(
-            test_ds,
-            batch_size=batch_size,
+            test_ds.batch(batch_size),
             verbose=0,
             # callbacks=None,
-            return_dict=True
+            return_dict=return_dict
         )
 
         print(f"✅ Model evaluated, IuO: {round(self.metrics['mean_iou'], 2)}")
