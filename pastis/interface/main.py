@@ -1,19 +1,23 @@
-from pastis.ml_logic.utils import load_geojson
-
 from pastis.ml_logic.data import PastisDataset
 from pastis.ml_logic.models.baseline_model import Unet_baseline
-from sklearn.model_selection import train_test_split
+from pastis.ml_logic.models.registry import save_results
 
-
-def train_baseline(model="baseline"):
+def train_baseline():
 
     # Instantiate class instance
-    pastis = PastisDataset('2019-08-16')
 
-    #
+    print("Initial data")
+    pastis = PastisDataset('2019-08-16')
+    print("tfds object is ready ")
+
+    # Instantiate Model
     unet = Unet_baseline()
-    unet.fit_model(pastis.train_dataset, validation_ds=pastis.val_dataset)
-    unet.evaluate_model(pastis.test_dataset)
+    history =unet.fit_model(pastis.train_dataset, validation_ds=pastis.val_dataset)
+
+    #metrics = unet.evaluate_model(pastis.test_dataset)
+    metrics=history.history
+
+    save_results(metrics)
 
 if __name__ == '__main__':
-    METADATA=load_geojson()
+    train_baseline()
