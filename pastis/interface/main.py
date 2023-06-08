@@ -14,10 +14,10 @@ def train_baseline():
     unet = Unet_baseline()
     history =unet.fit_model(pastis.train_dataset, validation_ds=pastis.val_dataset)
 
-    metrics = unet.evaluate_model(pastis.test_dataset)
-    params=history.history
+    #metrics = unet.evaluate_model(pastis.test_dataset)
+    metrics=history.history
 
-    save_results(params)
+    save_results(metrics)
 
 if __name__ == '__main__':
     train_baseline()

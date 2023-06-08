@@ -109,7 +109,7 @@ class Unet_baseline():
         """
 
         timestamp = time.strftime("%Y%m%d-%H%M%S")
-        params_path = os.path.join(SAVE_PATH, "params", timestamp + "modcheck.h5")
+        params_path = os.path.join(SAVE_PATH, "params", timestamp + "modcheck")
         csv_path = os.path.join(SAVE_PATH, "csv", timestamp + "_csvlog.csv")
 
         es = EarlyStopping(
@@ -120,7 +120,7 @@ class Unet_baseline():
         )
         ## add callbacks for metrics:
         #       - tf.keras.callbacks.ModelCheckpoint
-        mc= ModelCheckpoint(params_path)
+        mc= ModelCheckpoint(params_path,save_best_only=True)
 
         #       - tf.keras.callbacks.CSVLogger
         csvlog= CSVLogger(csv_path)
