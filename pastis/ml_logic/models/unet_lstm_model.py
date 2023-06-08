@@ -11,7 +11,7 @@ from keras.losses import CategoricalCrossentropy
 from keras.callbacks import EarlyStopping
 # from keras.metrics import IoU, MeanIoU
 
-from pastis.ml_logic.metrics import m_iou, _iou
+from pastis.ml_logic.models.metrics import m_iou, _iou
 
 # ----- CONVOLUTIONAL BLOCKS -----
 

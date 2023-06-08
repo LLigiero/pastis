@@ -87,6 +87,7 @@ class Unet_baseline():
         self.model.compile(loss=loss, optimizer=optimizer, metrics=metrics, run_eagerly=True)
 
         print("✅ Model compiled")
+        print(type(self.model))
 
         return self.model
 
@@ -127,7 +128,9 @@ class Unet_baseline():
             )
         print('-'*50)
 
-        return self.model, self.history
+        print(type(self.model))
+
+        return self.history
 
 
     # ----- EVALUATE MODEL -----
@@ -135,7 +138,9 @@ class Unet_baseline():
     def evaluate_model(
             self,
             test_ds,
-            batch_size=64
+            verbose=0,
+            batch_size=64,
+            return_dict=True
         ) -> tuple[Model, dict]:
         """
         Evaluate trained model performance on the test dataset
@@ -148,6 +153,6 @@ class Unet_baseline():
             return_dict=True
         )
 
-        print(f"✅ Model evaluated, IuO: {round(self.metrics['IuO'], 2)}")
+        print(f"✅ Model evaluated, IuO: {round(self.metrics['mean_iou'], 2)}")
 
         return self.metrics

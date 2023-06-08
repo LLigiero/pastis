@@ -13,6 +13,7 @@ def train_baseline(model="baseline"):
     #
     unet = Unet_baseline()
     unet.fit_model(pastis.train_dataset, validation_ds=pastis.val_dataset)
+    unet.evaluate_model(pastis.test_dataset)
 
 if __name__ == '__main__':
     METADATA=load_geojson()
