@@ -9,7 +9,10 @@ class PastisDataset:
     Custom Class wrapper to manipulate Tf dataset with S2 data
     """
 
-    def __init__(self, mono_date: int = 0) -> None:
+    def __init__(self, mono_date: str = "0") -> None:
+        ''' For selecting only one date of the time series, instantiate the class
+        with a mono_date format like "YYYY-MM-DD" '''
+
         metadata = load_geojson()
 
         splits = ["train", "val", "test"]

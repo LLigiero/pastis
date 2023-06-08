@@ -6,6 +6,7 @@ import tensorflow as tf
 import math
 from pastis.params import *
 import geopandas as gpd
+import pandas as pd
 
 
 def load_geojson() -> gpd:
@@ -21,14 +22,16 @@ def load_geojson() -> gpd:
 METADATA = load_geojson()
 
 
-def index_date(patch_id: int, mono_date: int = 20190816) -> int:
+def index_date(patch_id: int, mono_date: str = '2019-09-01') -> int:
     """Obtain the index of the nearest date of S2 satelite Time Series
     metadata = metadata.geojson (cf load_geojson function)
     patch_id = S2 satelite number
     mono_date = nearest date we want to observe
     """
-    date_values = np.array(list(METADATA["dates-S2"][patch_id].values()))
-    # mono_date=np.array(mono_date)
+    mono_date=np.datetime64("2019-09-01")
+    date_values = np.array(list(METADATA["dates-S2"][patch_id].values())).astype(str)
+    #convert the data to exploit it:
+    date_values = np.array(pd.to_datetime(date_values))
     index = np.abs(date_values - mono_date).argmin()
     return index
 
@@ -98,7 +101,7 @@ def one_hot(y: np.array, num_classes: int) -> np.array:
 
 def process_path(
     file_path: str,
-    mono_date: int,
+    mono_date: str,
 ) -> tf:
     """
     Preprocess time series.
@@ -112,7 +115,7 @@ def process_path(
     x = np.load(path)
     x = normalize_patch_spectra(x)
 
-    if mono_date != 0:
+    if mono_date != "0":
         index = index_date(patch_id, mono_date)
         x = x[index].swapaxes(0, 1).swapaxes(1, 2)
     else:
