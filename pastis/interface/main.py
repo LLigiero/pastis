@@ -12,12 +12,12 @@ def train_baseline():
 
     # Instantiate Model
     unet = Unet_baseline()
-    unet.fit_model(pastis.train_dataset, validation_ds=pastis.val_dataset)
+    history =unet.fit_model(pastis.train_dataset, validation_ds=pastis.val_dataset)
 
     metrics = unet.evaluate_model(pastis.test_dataset)
-    params=unet.history.__dict__
+    params=history.history
 
-    save_results(params, metrics)
+    save_results(params)
 
 if __name__ == '__main__':
     train_baseline()

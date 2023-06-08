@@ -1,15 +1,17 @@
+import os
+import time
 import numpy as np
 
 from tensorflow import keras
+
 from keras.models import Model
 from keras.layers import Input, Conv2D, Dropout
 from keras.activations import *
-
 from keras import optimizers
 from keras.losses import CategoricalCrossentropy
-from keras.callbacks import EarlyStopping
-# from keras.metrics import IoU, MeanIoU
+from keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 
+from pastis.params import SAVE_PATH
 from pastis.ml_logic.models.metrics import m_iou, _iou
 from pastis.ml_logic.models.layers import up_block,down_block,bottleneck
 
@@ -106,19 +108,30 @@ class Unet_baseline():
         Fit the model and return a tuple (fitted_model, history)
         """
 
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        params_path = os.path.join(SAVE_PATH, "params", timestamp + "modcheck.h5")
+        csv_path = os.path.join(SAVE_PATH, "csv", timestamp + "_csvlog.csv")
+
         es = EarlyStopping(
             monitor="val_loss",
             patience=patience,
             restore_best_weights=True,
             verbose=1
         )
+        ## add callbacks for metrics:
+        #       - tf.keras.callbacks.ModelCheckpoint
+        mc= ModelCheckpoint(params_path)
+
+        #       - tf.keras.callbacks.CSVLogger
+        csvlog= CSVLogger(csv_path)
+
 
         self.history = self.model.fit(
             train_ds.batch(batch_size),
             validation_data=validation_ds.batch(batch_size),
             epochs=epochs,
             batch_size=batch_size,
-            callbacks=[es],
+            callbacks=[es,mc,csvlog],
             verbose=1
         )
 

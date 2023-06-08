@@ -4,7 +4,7 @@ import pickle
 from pastis.params import SAVE_PATH
 
 
-def save_results(params: dict, metrics: dict) -> None:
+def save_results(params: dict) -> None:
 
     timestamp = time.strftime("%Y%m%d-%H%M%S")
 
@@ -14,10 +14,10 @@ def save_results(params: dict, metrics: dict) -> None:
         with open(params_path, "wb") as file:
             pickle.dump(params, file)
 
-    # Save metrics locally
-    if metrics is not None:
-        metrics_path = os.path.join(SAVE_PATH, "metrics", timestamp + ".pickle")
-        with open(metrics_path, "wb") as file:
-            pickle.dump(metrics, file)
+    # # Save metrics locally
+    # if metrics is not None:
+    #     metrics_path = os.path.join(SAVE_PATH, "metrics", timestamp + ".pickle")
+    #     with open(metrics_path, "wb") as file:
+    #         pickle.dump(metrics, file)
 
     print("✅ Results saved locally")
