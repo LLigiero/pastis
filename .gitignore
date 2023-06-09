@@ -3,6 +3,7 @@
 # folders
 raw_data/
 notebooks/
+models_output/
 
 
 # OS generated files
