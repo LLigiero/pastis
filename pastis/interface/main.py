@@ -34,7 +34,7 @@ def train_unet_clstm(weights=False,path=''):
     # Instantiate class instance
 
     print("Initial data")
-    pastis = PastisDataset('2019-08-16')
+    pastis = PastisDataset()
     print("tfds object is ready ")
 
     # Instantiate Model
@@ -43,8 +43,6 @@ def train_unet_clstm(weights=False,path=''):
 
     if weights:
         unet_clstm.model = load_weights_from_dir(unet_clstm.model, path)
-
-    history =unet_clstm.fit_model(pastis.train_dataset, validation_ds=pastis.val_dataset)
 
     ##metrics = unet.evaluate_model(pastis.test_dataset)
     metrics=history.history
