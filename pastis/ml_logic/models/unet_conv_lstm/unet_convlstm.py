@@ -4,6 +4,7 @@ import tensorflow as keras
 import time
 import os
 import numpy as np
+from statistics import mean
 
 from keras import layers, optimizers, Input
 from keras.layers import *
@@ -14,12 +15,14 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 from pastis.ml_logic.models.unet_conv_lstm.layers_convlstm import _encoder, _decoder
 from pastis.ml_logic.models.metrics import m_iou
 from pastis.params import SAVE_PATH, NUM_CLASSES
+from pastis.ml_logic.utils import rename_file
 
 class UNetConvLSTMModel:
     def __init__(self, num_classes=20):
         self.num_classes = num_classes
         self.build_model()
         self.compile_model()
+        self.name='UNetConvLSTMModel'
         # self.model = self.build_model()
         # self.model.compile()
 
@@ -114,6 +117,10 @@ class UNetConvLSTMModel:
             callbacks=[es,mc,csvlog],
             verbose=1
         )
+        #rename file with accuracy and model name
+        metrics = str(round(mean(self.history.history['acc']),3))
+        rename_file(params_path, metrics ,self.model.name)
+        rename_file(csv_path, metrics ,self.model.name)
 
         print('-'*50)
         print(f"✅ Model trained with :\n\
