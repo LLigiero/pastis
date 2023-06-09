@@ -96,7 +96,7 @@ class Unet_baseline():
     def fit_model(
             self,
             train_ds,
-            epochs=2,
+            epochs=200,
             batch_size=32, # TO DO check batch_size
             patience=2,
             validation_ds=None, # overrides validation_SAVE_PATH=./models_outputsplit

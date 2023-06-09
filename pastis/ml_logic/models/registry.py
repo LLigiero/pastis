@@ -1,6 +1,7 @@
 import os
 import time
 import pickle
+from keras.models import Model
 from pastis.params import SAVE_PATH
 
 
@@ -21,3 +22,13 @@ def save_results(metrics: dict) -> None:
             pickle.dump(metrics, file)
 
     print("✅ Results saved locally")
+
+def load_weights_from_dir(model: Model, path:str) -> Model:
+    """
+    Load weights saved in path into initialied model. Can be used to continue trainning,
+    evaluate/pred.
+    path is a folder in models_output/params/<checkpoint_of_choice>
+    example: path='./models_output/params/20230609-100711modcheck'
+    """
+    print("✅ Weights loaded to model")
+    return model.load_weights(path)
