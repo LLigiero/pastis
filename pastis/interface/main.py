@@ -4,7 +4,6 @@ from pastis.ml_logic.models.unet_conv_lstm.unet_convlstm import UNetConvLSTMMode
 
 from pastis.ml_logic.models.registry import save_results,load_weights_from_dir
 
-def train_baseline():
 
 def train_baseline(weights=False,path=''):
     """
