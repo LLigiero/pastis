@@ -1,7 +1,4 @@
-NUM_CLASSES = 20
-VOID_LABEL = 19
 TIME_SERIES_LENGTH = 70
-BATCH_SIZE = 8
 
 import tensorflow as keras
 import time
@@ -14,20 +11,23 @@ from keras.models import Model
 from keras.losses import CategoricalCrossentropy
 from keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 
-from pastis.ml_logic.models.layers_convlstm import _encoder, _decoder
+from pastis.ml_logic.models.unet_conv_lstm.layers_convlstm import _encoder, _decoder
 from pastis.ml_logic.models.metrics import m_iou
-from pastis.params import SAVE_PATH
+from pastis.params import SAVE_PATH, NUM_CLASSES
 
 class UNetConvLSTMModel:
     def __init__(self, num_classes=20):
         self.num_classes = num_classes
-        self.model = self.build_model()
-        self.model.compile()
+        self.build_model()
+        self.compile_model()
+        # self.model = self.build_model()
+        # self.model.compile()
 
     def build_model(self):
         inputs = Input(shape=(TIME_SERIES_LENGTH, 128, 128, 10))
         initializer = keras.random_normal_initializer(0., 0.02)
         encoder_filters = [16, 32, 32, 64]
+
         # Encoder
         encoder = _encoder(filters=encoder_filters)
         encoder_outputs = [encoder(inputs[:,i]) for i in range(TIME_SERIES_LENGTH)]
@@ -49,9 +49,12 @@ class UNetConvLSTMModel:
         # Decoder
         decoder_output = _decoder(skip_connections[::-1], clstm_output)
         output = Conv2D(NUM_CLASSES, kernel_size=(1, 1), activation='softmax')(decoder_output)
-        model = Model(inputs=inputs, outputs=output)
-        model.summary()
-        return model
+        self.model = Model(inputs=inputs, outputs=output)
+        self.model.summary()
+
+        print("✅ U-net_ConvLSTM Model initialized")
+
+        return self.model
 
  # ----- COMPILE MODEL -----
 
@@ -60,15 +63,14 @@ class UNetConvLSTMModel:
         Compile the U-net 2D + ConvLSTM model, using custom metric : Mean Intersection over Union (IoU)
         from metrics.py
         """
-        optimizer = optimizers.legacy.Adam(learning_rate=learning_rate)
+        optimizer = optimizers.Adam(learning_rate=learning_rate)
         loss = CategoricalCrossentropy()
         miou = m_iou(NUM_CLASSES)
         #iou = _iou(NUM_CLASSES)
         metrics = ['acc', miou.mean_iou]
         self.model.compile(loss=loss, optimizer=optimizer, metrics=metrics, run_eagerly=True)
 
-        print("✅ Model compiled")
-        print(type(self.model))
+        print("✅ U-net_ConvLSTM Model compiled")
 
         return self.model
 
@@ -78,7 +80,7 @@ class UNetConvLSTMModel:
             self,
             train_ds,
             epochs=2,
-            batch_size=BATCH_SIZE, # TO DO check batch_size
+            batch_size=32,
             patience=2,
             validation_ds=None,
         ) -> tuple[Model]:
