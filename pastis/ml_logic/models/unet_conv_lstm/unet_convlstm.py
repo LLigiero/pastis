@@ -1,5 +1,3 @@
-TIME_SERIES_LENGTH = 70
-
 import tensorflow as keras
 import time
 import os
@@ -14,11 +12,13 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 
 from pastis.ml_logic.models.unet_conv_lstm.layers_convlstm import _encoder, _decoder
 from pastis.ml_logic.models.metrics import m_iou
-from pastis.params import SAVE_PATH, NUM_CLASSES
+
+from pastis.params import *
 from pastis.ml_logic.utils import rename_file
 
+
 class UNetConvLSTMModel:
-    def __init__(self, num_classes=20):
+    def __init__(self, num_classes=NUM_CLASSES):
         self.num_classes = num_classes
         self.build_model()
         self.compile_model()
@@ -83,7 +83,7 @@ class UNetConvLSTMModel:
             self,
             train_ds,
             epochs=2,
-            batch_size=32,
+            batch_size=4,
             patience=2,
             validation_ds=None,
         ) -> tuple[Model]:
@@ -140,7 +140,7 @@ class UNetConvLSTMModel:
             self,
             test_ds,
             verbose=0,
-            batch_size=32,
+            batch_size=4,
             return_dict=True
         ) -> tuple[Model, dict]:
         """
@@ -156,9 +156,3 @@ class UNetConvLSTMModel:
         print(f"✅ Model evaluated, IuO: {round(self.metrics['mean_iou'], 2)}")
 
         return self.metrics
-
-
-if __name__ == '__main__':
-    num_classes = 20
-    model = UNetConvLSTMModel(num_classes).model
-    model.summary()

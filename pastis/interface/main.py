@@ -10,11 +10,12 @@ def train_baseline(weights=False,path=''):
     Train baseline model. weights and path are needed if we want to continue an already
     strated training.
     path is a folder in models_output/params/<checkpoint_of_choice>
+    PASTIS dates: September 2018 to November 2019
     """
     # Instantiate class instance
 
     print("Initial data")
-    pastis = PastisDataset('2019-08-16')
+    pastis = PastisDataset('2019-05-16')
     print("tfds object is ready ")
 
     # Instantiate Model
@@ -33,7 +34,7 @@ def train_unet_clstm(weights=False,path=''):
     # Instantiate class instance
 
     print("Initial data")
-    pastis = PastisDataset('2019-08-16')
+    pastis = PastisDataset()
     print("tfds object is ready ")
 
     # Instantiate Model
@@ -42,8 +43,6 @@ def train_unet_clstm(weights=False,path=''):
 
     if weights:
         unet_clstm.model = load_weights_from_dir(unet_clstm.model, path)
-
-    history =unet_clstm.fit_model(pastis.train_dataset, validation_ds=pastis.val_dataset)
 
     ##metrics = unet.evaluate_model(pastis.test_dataset)
     metrics=history.history
