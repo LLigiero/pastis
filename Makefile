@@ -1,11 +1,28 @@
 default :
 	echo "Makefile ready"
 
+# FOLDER MANAGEMENT
 
-reset_sample :
+reinstall_sample :
 	rm -rf raw_data/PASTIS-R-sample
 	gsutil -m cp -r gs://pastis-raw-data/PASTIS-R-sample raw_data/
 
 reinstall_requirements:
 	pip freeze | xargs pip uninstall -y
 	pip install -r requirements.txt
+
+reset_local_files :
+	rm -rf raw_data
+	mkdir raw_data
+	mkdir raw_data/PASTIS-R
+	mkdir raw_data/PASTIS-R/ANNOTATIONS
+	mkdir raw_data/PASTIS-R/DATA_S2
+
+download_unet_data : reset_local_files
+	gsutil -m cp -r gs://$(BUCKET_NAME)/PASTIS-R/ANNOTATIONS/*.npy raw_data/PASTIS-R/ANNOTATIONS/
+	gsutil cp gs://$(BUCKET_NAME)/PASTIS-R/metadata.geojson raw_data/PASTIS-R/
+	gsutil -m cp -r gs://$(BUCKET_NAME)/PASTIS-R/DATA_S2/*.npy raw_data/PASTIS-R/DATA_S2/
+	gsutil cp gs://$(BUCKET_NAME)/raw_data/data/ISIC_2019_Training_Metadata.csv  raw_data/
+
+test :
+	echo $(BUCKET_NAME)
