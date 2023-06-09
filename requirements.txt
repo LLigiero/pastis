@@ -13,5 +13,5 @@ matplotlib
 seaborn
 # data-science
 scikit-learn
-tensorflow
+tensorflow==2.10
 geopandas

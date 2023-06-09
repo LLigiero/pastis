@@ -50,5 +50,5 @@ def train_unet_clstm(weights=False,path=''):
     save_results(metrics)
 
 if __name__ == '__main__':
-    train_baseline()
+    #train_baseline()
     train_unet_clstm()

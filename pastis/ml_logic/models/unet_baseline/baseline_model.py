@@ -3,6 +3,7 @@ import time
 import numpy as np
 
 from tensorflow import keras
+from statistics import mean
 
 from keras.models import Model
 from keras.layers import Input, Conv2D, Dropout
@@ -14,6 +15,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 from pastis.params import SAVE_PATH, NUM_CLASSES
 from pastis.ml_logic.models.metrics import m_iou, _iou
 from pastis.ml_logic.models.unet_baseline.layers import up_block,down_block,bottleneck
+from pastis.ml_logic.utils import rename_file
 
 
 # ----- UNET BASELINE MODEL -----
@@ -26,6 +28,7 @@ class Unet_baseline():
     def __init__(self):
         self.init_model()
         self.compile_model()
+        self.name='Unet_baseline'
 
     def init_model(self,input_shape:tuple=(128,128,10), dropout:float=0) -> Model:
         '''U-net model architecture has 3 parts :
@@ -107,7 +110,7 @@ class Unet_baseline():
         """
 
         timestamp = time.strftime("%Y%m%d-%H%M%S")
-        params_path = os.path.join(SAVE_PATH, "params", timestamp + "modcheck")
+        params_path = os.path.join(SAVE_PATH, "params", timestamp + "_modcheck")
         csv_path = os.path.join(SAVE_PATH, "csv", timestamp + "_csvlog.csv")
 
         es = EarlyStopping(
@@ -132,6 +135,10 @@ class Unet_baseline():
             callbacks=[es,mc,csvlog],
             verbose=1
         )
+        #rename file with accuracy and model name
+        metrics = str(round(mean(self.history.history['acc']),3))
+        rename_file(params_path, metrics ,self.model.name)
+        rename_file(csv_path, metrics ,self.model.name)
 
         print('-'*50)
         print(f"✅ Model trained with :\n\
