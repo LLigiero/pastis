@@ -13,7 +13,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 
 from pastis.params import SAVE_PATH, NUM_CLASSES
 from pastis.ml_logic.models.metrics import m_iou, _iou
-from pastis.ml_logic.models.layers import up_block,down_block,bottleneck
+from pastis.ml_logic.models.unet_baseline.layers import up_block,down_block,bottleneck
 
 
 # ----- UNET BASELINE MODEL -----
