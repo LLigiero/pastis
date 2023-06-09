@@ -21,6 +21,17 @@ def load_geojson() -> gpd:
 
 METADATA = load_geojson()
 
+def rename_file (path_file:str, metrics:str, model_name:str)->str:
+    ''' function to rename the outputs_model files, to classify them:
+    from : timestamp_
+    to :   metrics_modelname_timestamp_'''
+    base = path_file.split('/')[:-1]
+    base='/'.join(base)+'/'
+    end = path_file.split('/')[-1]
+
+    rename = base+metrics+'_'+model_name+'_'+end
+    os.rename(path_file, rename)
+
 
 def index_date(patch_id: int, mono_date: str = '2019-09-01') -> int:
     """Obtain the index of the nearest date of S2 satelite Time Series
