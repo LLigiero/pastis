@@ -1,15 +1,17 @@
+import os
+import time
 import numpy as np
 
 from tensorflow import keras
+
 from keras.models import Model
 from keras.layers import Input, Conv2D, Dropout
 from keras.activations import *
-
 from keras import optimizers
 from keras.losses import CategoricalCrossentropy
-from keras.callbacks import EarlyStopping
-# from keras.metrics import IoU, MeanIoU
+from keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 
+from pastis.params import SAVE_PATH, NUM_CLASSES
 from pastis.ml_logic.models.metrics import m_iou, _iou
 from pastis.ml_logic.models.layers import up_block,down_block,bottleneck
 
@@ -58,7 +60,7 @@ class Unet_baseline():
             up4 = Dropout(dropout)(up4)
 
         # Final layer : 1x1 convolution with softmax activation
-        outputs = Conv2D(20, (1, 1), activation="softmax")(up4)
+        outputs = Conv2D(NUM_CLASSES, (1, 1), activation="softmax")(up4)
 
         # baseline unet
         self.model = Model(inputs, outputs, name='baseline_unet')
@@ -75,8 +77,6 @@ class Unet_baseline():
         Compile the U-net model, using custom metric : Mean Intersection over Union (IoU)
         from metrics.py
         """
-        NUM_CLASSES = 20 # à déplacer dans .env
-
         optimizer = optimizers.Adam(learning_rate=learning_rate)
         loss = CategoricalCrossentropy()
         # iou = IoU(NUM_CLASSES, list(range(0, NUM_CLASSES)), sparse_y_true=False, sparse_y_pred=False, name='IoU')
@@ -99,11 +99,16 @@ class Unet_baseline():
             epochs=2,
             batch_size=32, # TO DO check batch_size
             patience=2,
-            validation_ds=None, # overrides validation_split
-        ) -> tuple[Model, dict]:
+            validation_ds=None, # overrides validation_SAVE_PATH=./models_outputsplit
+
+        ) -> tuple[Model]:
         """
         Fit the model and return a tuple (fitted_model, history)
         """
+
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+        params_path = os.path.join(SAVE_PATH, "params", timestamp + "modcheck")
+        csv_path = os.path.join(SAVE_PATH, "csv", timestamp + "_csvlog.csv")
 
         es = EarlyStopping(
             monitor="val_loss",
@@ -111,13 +116,20 @@ class Unet_baseline():
             restore_best_weights=True,
             verbose=1
         )
+        ## add callbacks for metrics:
+        #       - tf.keras.callbacks.ModelCheckpoint
+        mc= ModelCheckpoint(params_path,save_best_only=True)
+
+        #       - tf.keras.callbacks.CSVLogger
+        csvlog= CSVLogger(csv_path)
+
 
         self.history = self.model.fit(
-            train_ds,
-            validation_data=validation_ds,
+            train_ds.batch(batch_size),
+            validation_data=validation_ds.batch(batch_size),
             epochs=epochs,
             batch_size=batch_size,
-            callbacks=[es],
+            callbacks=[es,mc,csvlog],
             verbose=1
         )
 
@@ -139,18 +151,17 @@ class Unet_baseline():
             self,
             test_ds,
             verbose=0,
-            batch_size=64,
+            batch_size=32,
             return_dict=True
         ) -> tuple[Model, dict]:
         """
         Evaluate trained model performance on the test dataset
         """
         self.metrics = self.model.evaluate(
-            test_ds,
-            batch_size=batch_size,
+            test_ds.batch(batch_size),
             verbose=0,
             # callbacks=None,
-            return_dict=True
+            return_dict=return_dict
         )
 
         print(f"✅ Model evaluated, IuO: {round(self.metrics['mean_iou'], 2)}")
