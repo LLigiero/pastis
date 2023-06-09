@@ -7,7 +7,7 @@ META_PATH = os.path.join(DATA_PATH, "metadata.geojson")
 
 SAVE_PATH = os.getenv("SAVE_PATH")
 
-TIME_SERIES_LENGTH = 70
+TIME_SERIES_LENGTH = 61
 
 FOLDS = {"train": [1, 2, 3], "val": [4], "test": [5]}  # or None to use whole data
 
