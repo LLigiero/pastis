@@ -82,9 +82,9 @@ class UNetConvLSTMModel:
     def fit_model(
             self,
             train_ds,
-            epochs=2,
+            epochs=25,
             batch_size=4,
-            patience=2,
+            patience=5,
             validation_ds=None,
         ) -> tuple[Model]:
         """
