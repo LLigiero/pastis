@@ -15,6 +15,9 @@ reinstall_requirements:
 run_unet_baseline_train:
 	python -c 'from pastis.interface.main import train_baseline; train_baseline()'
 
+run_unet_eval:
+	python -c 'from pastis.interface.main import evaluate_unet; evaluate_unet()'
+
 run_unet_convlstm_train:
 	python -c 'from pastis.interface.main import train_unet_clstm; train_unet_clstm()'
 

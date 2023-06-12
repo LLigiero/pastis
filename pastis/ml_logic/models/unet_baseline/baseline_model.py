@@ -101,9 +101,9 @@ class Unet_baseline():
     def fit_model(
             self,
             train_ds,
-            epochs=1,
+            epochs=30,
             batch_size=32, # TO DO check batch_size
-            patience=2,
+            patience=5,
             validation_ds=None, # overrides validation_SAVE_PATH=./models_outputsplit
 
         ) -> tuple[Model]:
@@ -172,7 +172,9 @@ class Unet_baseline():
             # callbacks=None,
             return_dict=return_dict
         )
-
-        print(f"✅ Model evaluated, IuO: {round(self.metrics['mean_iou'], 2)}")
+        print(f"✅ Model evaluated with :\n\
+            - Accuracy : {round(self.metrics['acc'],2)} \n\
+            - Mean IuO: {round(self.metrics['mean_iou'],2)}"
+            )
 
         return self.metrics
