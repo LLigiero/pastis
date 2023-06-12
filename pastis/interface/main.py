@@ -84,18 +84,20 @@ def predict_model(X_new,name_model=None):
     Make a prediction using the latest trained model
     """
         # Instantiate Model
-    unet_baseline = Unet_baseline()
+    #unet_baseline = Unet_baseline()
+    unet_clstm = UNetConvLSTMModel()
+
 
     #load model
     model_load = load_model_from_name_h5(name_model)
     weights = model_load.get_weights()
-    unet_baseline.model.set_weights(weights)
+    unet_clstm.model.set_weights(weights)
 
-    assert unet_baseline.model is not None
+    assert unet_clstm.model is not None
 
     X_new_processed= normalize_patch_spectra(X_new)
     X_new_processed= X_new_processed.swapaxes(1, 3).swapaxes(1, 2)
-    y_pred = unet_baseline.model.predict(X_new_processed, batch_size=128)
+    y_pred = unet_clstm.model.predict(X_new_processed, batch_size=128)
 
     return y_pred
 

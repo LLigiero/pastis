@@ -37,3 +37,6 @@ LABEL_NAMES = {
     "18": "Sorghum",
     "19": "Void label",
 }
+
+EARTHENGINE_TOKEN= os.getenv("EARTHENGINE_TOKEN")
+EARTHENGINE_MAIL= os.getenv("EARTHENGINE_MAIL")
