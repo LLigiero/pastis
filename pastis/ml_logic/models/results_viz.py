@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import csv
+from params import CSV_PATH
 
 def get_csv_data(file_name):
+    # file_name = CSV_PATH
     file_name = 'models_output/csv/0.302_baseline_unet_20230609-144414_csvlog.csv'
 
     d = {'epoch':[],
@@ -18,15 +20,15 @@ def get_csv_data(file_name):
         data = csv.DictReader(csvfile, skipinitialspace=True)
         for row in data:
             # row is a dict
-            d['epoch'].append(row['epoch'])
-            d['acc'].append(row['acc'])
-            d['iou'].append(row['iou'])
-            d['loss'].append(row['loss'])
-            d['mean_iou'].append(row['mean_iou'])
-            d['val_acc'].append(row['val_acc'])
-            d['val_iou'].append(row['val_iou'])
-            d['val_loss'].append(row['val_loss'])
-            d['val_mean_iou'].append(row['val_mean_iou'])
+            d['epoch'].append(float(row['epoch']))
+            d['acc'].append(float(row['acc']))
+            d['iou'].append(float(row['iou']))
+            d['loss'].append(float(row['loss']))
+            d['mean_iou'].append(float(row['mean_iou']))
+            d['val_acc'].append(float(row['val_acc']))
+            d['val_iou'].append(float(row['val_iou']))
+            d['val_loss'].append(float(row['val_loss']))
+            d['val_mean_iou'].append(float(row['val_mean_iou']))
 
     return d
 
