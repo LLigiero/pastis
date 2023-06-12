@@ -1,8 +1,8 @@
 from pastis.ml_logic.data import PastisDataset
 from pastis.ml_logic.models.unet_baseline.baseline_model import Unet_baseline
 from pastis.ml_logic.models.unet_conv_lstm.unet_convlstm import UNetConvLSTMModel
-
 from pastis.ml_logic.models.registry import save_results, load_model_from_name_h5, save_model
+from pastis.ml_logic.models.results_viz import plot_history
 
 
 def train_baseline(saved_model=False,name_model=''):

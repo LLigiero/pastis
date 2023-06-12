@@ -7,6 +7,9 @@ META_PATH = os.path.join(DATA_PATH, "metadata.geojson")
 
 SAVE_PATH = os.getenv("SAVE_PATH")
 
+# Model csv metrics
+CSV_PATH = os.path.join(SAVE_PATH, 'csv')
+
 TIME_SERIES_LENGTH = 61
 
 FOLDS = {"train": [1, 2, 3], "val": [4], "test": [5]}  # or None to use whole data
