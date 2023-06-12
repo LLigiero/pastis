@@ -152,7 +152,9 @@ class UNetConvLSTMModel:
             # callbacks=None,
             return_dict=return_dict
         )
-
-        print(f"✅ Model evaluated, IuO: {round(self.metrics['mean_iou'], 2)}")
+        print(f"✅ Model evaluated with :\n\
+            - Accuracy : {round(self.metrics['acc'],2)} \n\
+            - Mean IuO: {round(self.metrics['mean_iou'],2)}"
+            )
 
         return self.metrics

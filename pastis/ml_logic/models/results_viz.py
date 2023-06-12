@@ -1,18 +1,17 @@
 import matplotlib.pyplot as plt
 import csv
-from params import CSV_PATH
+from pastis.params import CSV_PATH
 
 def get_csv_data(file_name):
     # file_name = CSV_PATH
-    file_name = 'models_output/csv/0.302_baseline_unet_20230609-144414_csvlog.csv'
 
     d = {'epoch':[],
         'acc':[],
-        'iou':[],
+        #'iou':[],
         'loss':[],
         'mean_iou':[],
         'val_acc':[],
-        'val_iou':[],
+        #'val_iou':[],
         'val_loss':[],
         'val_mean_iou':[]}
 
@@ -22,11 +21,11 @@ def get_csv_data(file_name):
             # row is a dict
             d['epoch'].append(float(row['epoch']))
             d['acc'].append(float(row['acc']))
-            d['iou'].append(float(row['iou']))
+            #d['iou'].append(float(row['iou']))
             d['loss'].append(float(row['loss']))
             d['mean_iou'].append(float(row['mean_iou']))
             d['val_acc'].append(float(row['val_acc']))
-            d['val_iou'].append(float(row['val_iou']))
+            #d['val_iou'].append(float(row['val_iou']))
             d['val_loss'].append(float(row['val_loss']))
             d['val_mean_iou'].append(float(row['val_mean_iou']))
 
@@ -42,7 +41,7 @@ def plot_history(history:dict, title='', axs=None, model_name=""):
         model_name = '_' + model_name
     ax1.plot(history['loss'], label = 'train loss' + model_name)
     ax1.plot(history['val_loss'], label = 'val' + model_name)
-    ax1.set_ylim(1, 2.75)
+    ax1.set_ylim(0.5, 2.75)
     ax1.set_title('Loss')
     ax1.legend()
 
