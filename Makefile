@@ -7,9 +7,19 @@ reinstall_sample :
 	rm -rf raw_data/PASTIS-R-sample
 	gsutil -m cp -r gs://pastis-raw-data/PASTIS-R-sample raw_data/
 
+
 reinstall_requirements:
 	pip freeze | xargs pip uninstall -y
 	pip install -r requirements.txt
+
+run_unet_baseline_train:
+	python -c 'from pastis.interface.main import train_baseline; train_baseline()'
+
+run_unet_convlstm_train:
+	python -c 'from pastis.interface.main import train_unet_clstm; train_unet_clstm()'
+
+run_unet_convlstm_eval:
+	python -c 'from pastis.interface.main import evaluate_unet_clstm; evaluate_unet_clstm()'
 
 reset_local_files :
 	rm -rf raw_data

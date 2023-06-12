@@ -1,6 +1,7 @@
 from tensorflow import keras
 from keras.metrics import MeanIoU, IoU
 import numpy as np
+import tensorflow as tf
 
 class m_iou():
     def __init__(self, classes: int) -> None:
@@ -11,6 +12,7 @@ class m_iou():
         miou_keras = MeanIoU(num_classes= self.classes, sparse_y_pred=False, sparse_y_true=False)
         miou_keras.update_state(y_true, y_pred)
         return miou_keras.result().numpy()
+
     def miou_class(self, y_true, y_pred):
         y_pred = np.argmax(y_pred, axis = 3)
         miou_keras = MeanIoU(num_classes= self.classes)
@@ -19,6 +21,8 @@ class m_iou():
         for i in  range(self.classes):
             class_iou = values[i,i] / (sum(values[i,:]) + sum(values[:,i]) - values[i,i])
             print(f'IoU for class{str(i + 1)} is: {class_iou}')
+
+
 
 class _iou():
     def __init__(self, classes: int) -> None:
