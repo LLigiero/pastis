@@ -3,7 +3,7 @@ from pastis.ml_logic.models.unet_baseline.baseline_model import Unet_baseline
 from pastis.ml_logic.models.unet_conv_lstm.unet_convlstm import UNetConvLSTMModel
 
 from pastis.ml_logic.models.registry import save_results,load_weights_from_dir
-
+from pastis.ml_logic.models.results_viz import plot_history
 
 def train_baseline(weights=False,path=''):
     """

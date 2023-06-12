@@ -18,7 +18,6 @@ run_unet_baseline_train:
 run_unet_convlstm_train:
 	python -c 'from pastis.interface.main import train_unet_clstm; train_unet_clstm(weights=False,path="")'
 
-
 reset_local_files :
 	rm -rf raw_data
 	mkdir raw_data
