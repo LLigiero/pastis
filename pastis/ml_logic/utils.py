@@ -129,6 +129,7 @@ def process_path(
     if mono_date != "0":
         index = index_date(patch_id, mono_date)
         x = x[index].swapaxes(0, 1).swapaxes(1, 2)
+        print(patch_id, index)
     else:
         x = pad_time_series(x, TIME_SERIES_LENGTH)
         x = x.swapaxes(1, 3).swapaxes(1, 2)

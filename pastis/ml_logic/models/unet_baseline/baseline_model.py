@@ -176,18 +176,3 @@ class Unet_baseline():
         print(f"✅ Model evaluated, IuO: {round(self.metrics['mean_iou'], 2)}")
 
         return self.metrics
-
-    def predict_model(self,X_pred):
-        """
-        x=numpy array with correct shape
-
-        Make a prediction using the latest trained model
-        """
-        #model = load_model()
-        assert self.model is not None
-
-        X_processed= normalize_patch_spectra(X_pred)
-        X_processed= X_processed.swapaxes(1, 3).swapaxes(1, 2)
-        y_pred = self.model.predict(X_processed)
-
-        return y_pred
