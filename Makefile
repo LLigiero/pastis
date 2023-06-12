@@ -13,11 +13,13 @@ reinstall_requirements:
 	pip install -r requirements.txt
 
 run_unet_baseline_train:
-	python -c 'from pastis.interface.main import train_baseline; train_baseline(weights=False,path="")'
+	python -c 'from pastis.interface.main import train_baseline; train_baseline()'
 
 run_unet_convlstm_train:
-	python -c 'from pastis.interface.main import train_unet_clstm; train_unet_clstm(weights=False,path="")'
+	python -c 'from pastis.interface.main import train_unet_clstm; train_unet_clstm()'
 
+run_unet_convlstm_eval:
+	python -c 'from pastis.interface.main import evaluate_unet_clstm; evaluate_unet_clstm()'
 
 reset_local_files :
 	rm -rf raw_data

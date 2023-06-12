@@ -99,9 +99,9 @@ class Unet_baseline():
     def fit_model(
             self,
             train_ds,
-            epochs=200,
+            epochs=1,
             batch_size=32, # TO DO check batch_size
-            patience=10,
+            patience=2,
             validation_ds=None, # overrides validation_SAVE_PATH=./models_outputsplit
 
         ) -> tuple[Model]:
@@ -149,7 +149,7 @@ class Unet_baseline():
 
         print(type(self.model))
 
-        return self.history
+        return self.model, self.history
 
 
     # ----- EVALUATE MODEL -----

@@ -131,7 +131,7 @@ class UNetConvLSTMModel:
 
         #print(type(self.model))
 
-        return self.history
+        return self.model, self.history
 
 
     # ----- EVALUATE MODEL -----
