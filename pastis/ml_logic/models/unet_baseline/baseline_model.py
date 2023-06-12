@@ -15,7 +15,9 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, CSVLogger
 from pastis.params import SAVE_PATH, NUM_CLASSES
 from pastis.ml_logic.models.metrics import m_iou, _iou
 from pastis.ml_logic.models.unet_baseline.layers import up_block,down_block,bottleneck
-from pastis.ml_logic.utils import rename_file
+
+
+from pastis.ml_logic.utils import normalize_patch_spectra, rename_file
 
 
 # ----- UNET BASELINE MODEL -----
