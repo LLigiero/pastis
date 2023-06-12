@@ -4,6 +4,8 @@ from pastis.ml_logic.models.unet_conv_lstm.unet_convlstm import UNetConvLSTMMode
 from pastis.ml_logic.models.registry import save_results, load_model_from_name_h5, save_model
 from pastis.ml_logic.models.results_viz import plot_history
 
+from pastis.ml_logic.utils import normalize_patch_spectra
+
 
 def train_baseline(saved_model=False,name_model=''):
     """
@@ -64,7 +66,7 @@ def evaluate_unet_clstm(name_model=''):
 
     # Instantiate Model
     unet_clstm = UNetConvLSTMModel()
-    assert unet_clstm.model is not None
+    assert unet_clstm.model is not ''
 
     #load model
     model_load = load_model_from_name_h5(name_model)
@@ -73,6 +75,30 @@ def evaluate_unet_clstm(name_model=''):
 
     metrics = unet_clstm.evaluate_model(pastis.test_dataset)
     save_results(metrics)
+
+
+def predict_model(X_new,name_model=None):
+    """
+    x=numpy array with correct shape
+
+    Make a prediction using the latest trained model
+    """
+        # Instantiate Model
+    unet_baseline = Unet_baseline()
+
+    #load model
+    model_load = load_model_from_name_h5(name_model)
+    weights = model_load.get_weights()
+    unet_baseline.model.set_weights(weights)
+
+    assert unet_baseline.model is not None
+
+    X_new_processed= normalize_patch_spectra(X_new)
+    X_new_processed= X_new_processed.swapaxes(1, 3).swapaxes(1, 2)
+    y_pred = unet_baseline.model.predict(X_new_processed, batch_size=128)
+
+    return y_pred
+
 
 
 if __name__ == '__main__':

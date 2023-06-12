@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import csv
-from params import CSV_PATH
+from pastis.params import CSV_PATH
 
 def get_csv_data(file_name):
     # file_name = CSV_PATH
