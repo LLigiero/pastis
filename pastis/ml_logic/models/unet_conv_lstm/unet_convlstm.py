@@ -84,7 +84,7 @@ class UNetConvLSTMModel:
             train_ds,
             epochs=25,
             batch_size=4,
-            patience=5,
+            patience=10,
             validation_ds=None,
         ) -> tuple[Model]:
         """
