@@ -40,10 +40,20 @@ def get_radar(time_series, t_show=-1):
     radar_image = reshape_patch_spectra(image_normalized)
     return radar_image
 
+def plot_y_pred(y_pred):
+    """
+    Utility function display y_pred
+    """
+    c_m = cm.get_cmap('tab20')
+    def_colors = c_m.colors
+    cus_colors = ['k'] + [def_colors[i] for i in range(1,20)] + ['w']
+    semantic_cmap = colors.ListedColormap(colors = cus_colors, name='agri',N=21)
+    plt.imshow(y_pred, cmap= semantic_cmap, vmin=0, vmax=19)
+    plt.title('Prediction')
+
 def plot_semantic(patch_id):
     """
-    Utility function to get a displayable rgb image from id_patch
-    of a semantic target.
+    Utility function display semantic target.
     """
     c_m = cm.get_cmap('tab20')
     def_colors = c_m.colors
