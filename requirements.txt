@@ -15,3 +15,7 @@ seaborn
 scikit-learn
 tensorflow==2.10
 geopandas
+#FastAPI
+fastapi
+geemap
+earthengine-api

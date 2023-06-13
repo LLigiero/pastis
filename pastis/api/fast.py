@@ -1,9 +1,13 @@
 import pandas as pd
+import numpy as np
+import ee
+import geemap
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pastis.ml_logic.models.unet_baseline.baseline_model import Unet_baseline
 from pastis.ml_logic.models.registry import load_model_from_name_h5
-import numpy as np
+from pastis.params import *
+
 
 # run API: uvicorn pastis.api.fast:app --reload
 app = FastAPI()
@@ -13,16 +17,16 @@ app = FastAPI()
 ##############################
 
 ### Instantiate Model
-#trained_model = Unet_baseline()
-#assert trained_model.model is not None
+trained_model = Unet_baseline()
+# assert trained_model.model is not None
 
 ### Load model
-#name_model='20230612-113429.h5'
-#model_load = load_model_from_name_h5(name_model)
-#weights = model_load.get_weights()
-#trained_model.model.set_weights(weights)
+name_model='20230612-113429.h5' # TO DO get model in bucket
+model_load = load_model_from_name_h5(name_model)
+weights = model_load.get_weights()
+trained_model.model.set_weights(weights)
 
-# app.state.model = load_model_from_name_h5(trained_model)
+app.state.model = trained_model.model
 
 ##############################
 ##############################
@@ -47,28 +51,62 @@ def convert_to_numpy_array(params:dict) -> np.ndarray:
     """ Given an input of lat and lon, generates a picture of geometry size similar to our S2 data.
     Return the corresponding np.array
     """
+    # connect to earth engine api via service account
+    service_account=EARTHENGINE_MAIL
+    credentials=ee.ServiceAccountCredentials(service_account, EARTHENGINE_TOKEN)
+    ee.Initialize(credentials)
 
-    # step 1 : generates geometry
-    # example: gemoetry = [
-        # [[-1.270332050595563, 49.6353097251849],
-        #  [-1.2526136350202335, 49.635043589013904],
-        #  [-1.2530253544991803, 49.623535818998874],
-        #  [-1.270739600356701, 49.62380184758293],
-        #  [-1.270332050595563, 49.6353097251849]]
-        # ]
+    # step 1 : generates geometry, a square from a point
+    point = ee.Geometry.Point([params['lat'], params['lon']])
+    areaM2 = 1280*1280
+    square = point.buffer(ee.Number(areaM2).sqrt().divide(2), 1).bounds()
 
     # step 2 : generate image
-
+    #Deffining images to be used for Snetinell (s2) collection
+    startDate = '2023-04-01'
+    endDate = '2023-06-01'
+    s2 = ee.ImageCollection('COPERNICUS/S2_HARMONIZED').filterDate(startDate, endDate)\
+        .filterBounds(square).filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 5))\
+        .sort('CLOUDY_PIXEL_PERCENTAGE', False)
+    #firts image from collection and only 10bands for pastis
+    image = s2.first()
+    image = image.select(['B2', 'B3', 'B4','B5', 'B6', 'B7','B8','B8A', 'B11', 'B12'])
+    #get projection for 10x10m pixel and resample
+    proj_10m = image.select('B2').projection()
+    img = image.resample('bilinear').reproject(proj_10m)
 
     # step 3 : convert image to np.array to use for image show and prediction
+    image_np = geemap.ee_to_numpy(img, region = square)
+    image_np = image_np[:128,:128,:] #assert shape (128,128,10)
 
-    pass
+    return image_np
 
 
 # define a root `/` endpoint
 @app.get("/")
 def root():
     return {'Prediction' : 'I need more pastis'}
+
+# return input image of type np.ndarray
+@app.get("/input_image")
+def get_input_image(
+    latitude:str,
+    longitude:str
+    ):
+    """
+    Returns the test image in np.ndarray format
+    """
+
+    params ={
+        'lat':latitude,
+        'lon':longitude
+        }
+
+    res = convert_to_numpy_array(params)
+
+    return {'Image_input': res}
+
+
 
 # show input image
 @app.get("/input_image")
@@ -79,7 +117,6 @@ def show_input_image(
     """
     Plots the test image
     """
-
     return {'Image_input': 'Image np array'}
 
 
