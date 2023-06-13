@@ -22,7 +22,7 @@ trained_model = Unet_baseline()
 # assert trained_model.model is not None
 
 ### Load model
-name_model='20230612-113429.h5' # TO DO get model in bucket
+name_model='20230612-113429.h5' # TO DO: get model from bucket
 model_load = load_model_from_name_h5(name_model)
 weights = model_load.get_weights()
 trained_model.model.set_weights(weights)
@@ -67,10 +67,10 @@ def get_input_output_image(
         }
 
     _in = gee_to_numpy_array(params)
-    #_out = predict_model(_in, name_model='20230612-113429.h5')
+    _out = predict_model(_in, name_model='20230612-113429.h5')
 
     return {'patch': json.dumps(_in.tolist()),
             'pred' : ''}
 
-    # return {'patch': '',
+    # return {'patch': json.dumps(_in.tolist()),
     #         'pred' : json.dumps(_out.tolist())}
