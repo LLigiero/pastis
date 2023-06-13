@@ -62,6 +62,18 @@ def normalize_patch_spectra(time_series: np.array) -> np.array:
     result = (time_series - norm[0][None, :, None, None]) / norm[1][None, :, None, None]
     return result
 
+def normalize_image(image: np.array) -> np.array:
+    """Utility function to normalize the Sentinel-2 patch spectra.
+    The patch must consist of 10 spectra and the shape n*10*n*n."""
+    with open(os.path.join(DATA_PATH, "NORM_S2_patch.json"), "r") as file:
+        normvals = json.loads(file.read())
+        selected_folds = FOLDS["test"] if FOLDS is not None else range(1, 6)
+        means = [normvals[f"Fold_{f}"]["mean"] for f in selected_folds]
+        stds = [normvals[f"Fold_{f}"]["std"] for f in selected_folds]
+        norm = np.stack(means).mean(axis=0), np.stack(stds).mean(axis=0)
+    result = (image - norm[0][None, None, :]) / norm[1][None, None, :]
+    return result
+
 
 def pad_time_series_by_zeros(time_series: np.array, size: int) -> np.array:
     """

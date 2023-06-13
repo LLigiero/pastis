@@ -6,8 +6,9 @@ from pastis.ml_logic.models.unet_baseline.baseline_model import Unet_baseline
 from pastis.ml_logic.models.unet_conv_lstm.unet_convlstm import UNetConvLSTMModel
 from pastis.ml_logic.models.registry import save_results, load_model_from_name_h5, save_model
 from pastis.ml_logic.models.results_viz import plot_history
+from pastis.ml_logic.utils import normalize_image, normalize_patch_spectra, pad_time_series
+from pastis.params import *
 
-from pastis.ml_logic.utils import normalize_patch_spectra
 
 def train_baseline(saved_model=False,name_model=''):
     """
@@ -88,7 +89,7 @@ def evaluate_unet_clstm(name_model='20230613-065205_unet_convlstm_suite.h5'):
 
     # Instantiate Model
     unet_clstm = UNetConvLSTMModel()
-    assert unet_clstm.model is not ''
+    assert unet_clstm.model is not None
 
     #load model
     model_load = load_model_from_name_h5(name_model)
@@ -99,11 +100,11 @@ def evaluate_unet_clstm(name_model='20230613-065205_unet_convlstm_suite.h5'):
     save_results(metrics)
 
 
-def predict_model(X_new,name_model=None):
+def predict_model_unet(X_new,name_model=None):
     """
-    x=numpy array with correct shape
-
-    Make a prediction using the latest trained model
+    X_new=numpy array with correct shape(128,128,10) or (128,128,10)
+    Make a prediction using the latest Unet trained model
+    Output: np.array (128,128) if ok; str if error
     """
     # Instantiate Model
     unet_baseline = Unet_baseline()
@@ -115,11 +116,22 @@ def predict_model(X_new,name_model=None):
 
     assert unet_baseline.model is not None
 
-    X_new_processed= normalize_patch_spectra(X_new)
-    X_new_processed= X_new_processed.swapaxes(1, 3).swapaxes(1, 2)
-    y_pred = unet_baseline.model.predict(X_new_processed, batch_size=128)
+    if X_new.shape == (128,128,10):
+        X_new_processed= normalize_image(X_new)
+        X_new_processed = np.expand_dims(X_new_processed, axis=0)
+        y_pred = unet_baseline.model.predict(X_new_processed)
+        y_pred = np.argmax(y_pred[0], axis=2)
+        return y_pred
 
-    return y_pred
+    if X_new.shape == (10,128,128):
+        X_new = X_new.swapaxes(0, 1).swapaxes(1, 2)
+        X_new_processed= normalize_image(X_new)
+        X_new_processed = np.expand_dims(X_new_processed, axis=0)
+        y_pred = unet_baseline.model.predict(X_new_processed)
+        y_pred = np.argmax(y_pred[0], axis=2)
+        return y_pred
+
+    return 'Please verify input shape'
 
 
 

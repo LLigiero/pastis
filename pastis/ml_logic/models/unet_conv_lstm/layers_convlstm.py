@@ -8,7 +8,6 @@ from keras import Sequential
 loss = keras.losses.CategoricalCrossentropy()
 optimizer = keras.optimizers.legacy.Adam(learning_rate=0.005)
 initializer = keras.random_normal_initializer(0., 0.02)
-# TIME_SERIES_LENGTH = 70
 
 # Encoder
 def _encoder(filters, input_shape=(128,128,10)):
