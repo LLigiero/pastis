@@ -13,16 +13,16 @@ app = FastAPI()
 ##############################
 
 ### Instantiate Model
-trained_model = Unet_baseline()
-assert trained_model.model is not None
+#trained_model = Unet_baseline()
+#assert trained_model.model is not None
 
 ### Load model
-name_model='20230612-113429.h5'
-model_load = load_model_from_name_h5(name_model)
-weights = model_load.get_weights()
-trained_model.model.set_weights(weights)
+#name_model='20230612-113429.h5'
+#model_load = load_model_from_name_h5(name_model)
+#weights = model_load.get_weights()
+#trained_model.model.set_weights(weights)
 
-app.state.model = load_model_from_name_h5(trained_model)
+# app.state.model = load_model_from_name_h5(trained_model)
 
 ##############################
 ##############################
@@ -43,7 +43,7 @@ params ={'lat':-1.341984802380476,
 
 # call google earth engine api to convert in S2 data
 
-def convert_to_numpy_array(params:dict) -> np.array():
+def convert_to_numpy_array(params:dict) -> np.ndarray:
     """ Given an input of lat and lon, generates a picture of geometry size similar to our S2 data.
     Return the corresponding np.array
     """
