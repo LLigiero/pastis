@@ -105,7 +105,7 @@ def predict_model(X_new,name_model=None):
 
     Make a prediction using the latest trained model
     """
-        # Instantiate Model
+    # Instantiate Model
     unet_baseline = Unet_baseline()
 
     #load model

@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np
-import ee
-import geemap
+import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pastis.ml_logic.models.unet_baseline.baseline_model import Unet_baseline
 from pastis.ml_logic.models.registry import load_model_from_name_h5
+from pastis.ml_logic.utils import gee_to_numpy_array
+from pastis.interface.main import predict_model
 from pastis.params import *
 
 
@@ -45,90 +46,31 @@ app.add_middleware(
 params ={'lat':-1.341984802380476,
          'lon':49.60024167842473}
 
-# call google earth engine api to convert in S2 data
-
-def convert_to_numpy_array(params:dict) -> np.ndarray:
-    """ Given an input of lat and lon, generates a picture of geometry size similar to our S2 data.
-    Return the corresponding np.array
-    """
-    # connect to earth engine api via service account
-    service_account=EARTHENGINE_MAIL
-    credentials=ee.ServiceAccountCredentials(service_account, EARTHENGINE_TOKEN)
-    ee.Initialize(credentials)
-
-    # step 1 : generates geometry, a square from a point
-    point = ee.Geometry.Point([params['lat'], params['lon']])
-    areaM2 = 1280*1280
-    square = point.buffer(ee.Number(areaM2).sqrt().divide(2), 1).bounds()
-
-    # step 2 : generate image
-    #Deffining images to be used for Snetinell (s2) collection
-    startDate = '2023-04-01'
-    endDate = '2023-06-01'
-    s2 = ee.ImageCollection('COPERNICUS/S2_HARMONIZED').filterDate(startDate, endDate)\
-        .filterBounds(square).filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 5))\
-        .sort('CLOUDY_PIXEL_PERCENTAGE', False)
-    #firts image from collection and only 10bands for pastis
-    image = s2.first()
-    image = image.select(['B2', 'B3', 'B4','B5', 'B6', 'B7','B8','B8A', 'B11', 'B12'])
-    #get projection for 10x10m pixel and resample
-    proj_10m = image.select('B2').projection()
-    img = image.resample('bilinear').reproject(proj_10m)
-
-    # step 3 : convert image to np.array to use for image show and prediction
-    image_np = geemap.ee_to_numpy(img, region = square)
-    image_np = image_np[:128,:128,:] #assert shape (128,128,10)
-
-    return image_np
-
-
 # define a root `/` endpoint
 @app.get("/")
 def root():
-    return {'Prediction' : 'I need more pastis'}
+    return {'Prediction' : 'Give me more pastis, bro'}
 
-# return input image of type np.ndarray
-@app.get("/input_image")
-def get_input_image(
+# return input and output image of type np.ndarray
+@app.get("/image")
+def get_input_output_image(
     latitude:str,
     longitude:str
     ):
     """
-    Returns the test image in np.ndarray format
+    Returns the input and predicted images in np.ndarray format
     """
 
     params ={
-        'lat':latitude,
-        'lon':longitude
+        'lat':float(latitude),
+        'lon':float(longitude)
         }
 
-    res = convert_to_numpy_array(params)
+    _in = gee_to_numpy_array(params)
+    #_out = predict_model(_in, name_model='20230612-113429.h5')
 
-    return {'Image_input': res}
+    return {'patch': json.dumps(_in.tolist()),
+            'pred' : ''}
 
-
-
-# show input image
-@app.get("/input_image")
-def show_input_image(
-    latitude:str,
-    longitude:str
-    ):
-    """
-    Plots the test image
-    """
-    return {'Image_input': 'Image np array'}
-
-
-# show prediction
-@app.get("/predict")
-def predict(
-    latitude:str,
-    longitude:str
-    ):
-    """
-    Make a 128 x 128 image prediction with classes.
-    Converts latitute and longitude inputs into S2-type data (shape 128x128x10)
-    """
-
-    return {'Baseline_prediction': 'I need more pastis'}
+    # return {'patch': '',
+    #         'pred' : json.dumps(_out.tolist())}
