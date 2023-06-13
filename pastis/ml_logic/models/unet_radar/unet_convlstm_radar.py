@@ -14,6 +14,7 @@ from pastis.ml_logic.models.metrics import m_iou
 from pastis.ml_logic.models.unet_radar.layers_radar import _encoder_optic, _encoder_radar, _decoder_radar
 
 from pastis.params import *
+from pastis.ml_logic.utils import rename_file
 
 
 
@@ -71,7 +72,7 @@ class UNetConvLSTMModel_Multimodal:
         decoder_output = _decoder_radar(skip_connections_opt[::-1],skip_connections_radar[::-1], clstm_output)
         output = Conv2D(NUM_CLASSES, kernel_size=(1, 1), activation='softmax')(decoder_output)
         self.model = Model(inputs=[inputs_opt,inputs_radar], outputs=output)
-        self.model.summary()
+        #self.model.summary()
 
         print("✅ U-net_ConvLSTM Multimodal Model initialized")
 
@@ -101,10 +102,11 @@ class UNetConvLSTMModel_Multimodal:
     def fit_model(
             self,
             train_ds,
-            epochs=25,
+            epochs=1,
             batch_size=4,
-            patience=10,
+            patience=1,
             validation_ds=None,
+
         ) -> tuple[Model]:
         """
         Fit the model and return history
@@ -130,7 +132,7 @@ class UNetConvLSTMModel_Multimodal:
 
         self.history = self.model.fit(
             train_ds.batch(batch_size),
-            validation_data=validation_ds.batch(batch_size),
+            validation_data= (validation_ds.batch(batch_size)),
             epochs=epochs,
             batch_size=batch_size,
             callbacks=[es,mc,csvlog],
@@ -138,8 +140,8 @@ class UNetConvLSTMModel_Multimodal:
         )
         #rename file with accuracy and model name
         metrics = str(round(mean(self.history.history['acc']),3))
-        #rename_file(params_path, metrics ,self.model.name)
-        #rename_file(csv_path, metrics ,self.model.name)
+        rename_file(params_path, metrics ,self.model.name)
+        rename_file(csv_path, metrics ,self.model.name)
 
         print('-'*50)
         print(f"✅ Model trained with :\n\
