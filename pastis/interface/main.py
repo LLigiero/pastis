@@ -56,7 +56,7 @@ def evaluate_unet(name_model='20230612-113429_baseline_aout.h5'):
     save_results(metrics)
 
 
-def train_unet_clstm(saved_model=False,name_model=''):
+def train_unet_clstm(saved_model=True,name_model='20230613-065205_unet_convlstm_suite.h5'):
 
     # Instantiate class instance
 
@@ -79,7 +79,7 @@ def train_unet_clstm(saved_model=False,name_model=''):
     save_results(metrics)
 
 
-def evaluate_unet_clstm(name_model='20230612-171729_unet_convlstm.h5'):
+def evaluate_unet_clstm(name_model='20230613-065205_unet_convlstm_suite.h5'):
 
     # Instantiate class instance
     print("Initial data")
