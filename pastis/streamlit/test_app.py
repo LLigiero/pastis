@@ -1,85 +1,82 @@
 import streamlit as st
-import ee
-from params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL
-
-
-def app():
-    st.title("Home")
-
-    st.header("Introduction")
-    st.markdown(
-        """
-    This site demostrates how to build a multi-page [Earth Engine](https://earthengine.google.com) App using [streamlit](https://streamlit.io) and [geemap](https://geemap.org).
-    You can deploy the app on various cloud platforms, such as [share.streamlit.io](https://share.streamlit.io) or [Heroku](https://heroku.com).
-    Make sure you set `EARTHENGINE_TOKEN='your-token'` as an environment variable (secret) on the cloud platform.
-    - **Web App:** <https://gishub.org/geemap-apps>
-    - **Github:** <https://github.com/giswqs/geemap-apps>
-    """
-    )
-
-    with st.expander("Where to find your Earth Engine token?"):
-        st.markdown(
-            """
-            - **Windows:** `C:/Users/USERNAME/.config/earthengine/credentials`
-            - **Linux:** `/home/USERNAME/.config/earthengine/credentials`
-            - **macOS:** `/Users/USERNAME/.config/earthengine/credentials`
-            """
-        )
-
-    st.header("Example")
-
-    with st.expander("See Source Code"):
-        st.code(
-            """
-# Import libraries
-import ee
+import ee, requests, os
+import pandas as pd
 import geemap.foliumap as geemap
 
-# Create an interactive map
-Map = geemap.Map(plugin_Draw=True, Draw_export=False)
-# Add a basemap
-Map.add_basemap("TERRAIN")
-# Retrieve Earth Engine dataset
-dem = ee.Image("USGS/SRTMGL1_003")
-# Set visualization parameters
-vis_params = {
-    "min": 0,
-    "max": 4000,
-    "palette": ["006633", "E5FFCC", "662A00", "D8D8D8", "F5F5F5"],
-}
-# Add the Earth Engine image to the map
-Map.addLayer(dem, vis_params, "SRTM DEM", True, 0.5)
-# Add a colorbar to the map
-Map.add_colorbar(vis_params["palette"], 0, 4000, caption="Elevation (m)")
-# Render the map using streamlit
-Map.to_streamlit()
+from pastis.params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL, TEST_SAT_IMG, ZOOM_MAP
 
-        """
-        )
-    # Import libraries
-    import ee
-    import geemap.foliumap as geemap
+    # - **Web App:** <https://gishub.org/geemap-apps>
+    # - **Github:** <https://github.com/giswqs/geemap-apps>
 
-    # Create an interactive map
-    Map = geemap.Map(plugin_Draw=True, Draw_export=False)
-    # Add a basemap
-    Map.add_basemap("TERRAIN")
-    # Retrieve Earth Engine dataset
-    dem = ee.Image("USGS/SRTMGL1_003")
-    # Set visualization parameters
-    vis_params = {
-        "min": 0,
-        "max": 4000,
-        "palette": ["006633", "E5FFCC", "662A00", "D8D8D8", "F5F5F5"],
+start_coordinates=(48.91405555630452,-1.5749111956249313)# S2_100015 first coordinate
+
+
+def get_coordinates(address):
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {
+        'q': address,
+        'format': 'json'
     }
-    # Add the Earth Engine image to the map
-    Map.addLayer(dem, vis_params, "SRTM DEM", True, 0.5)
-    # Add a colorbar to the map
-    Map.add_colorbar(vis_params, label="Elevation (m)")
-    # Render the map using streamlit
-    Map.to_streamlit()
+    response = requests.get(url, params=params).json()
+    return (response[0]['lat'], response[0]['lon'])
 
-app()
-service_account = EARTHENGINE_MAIL
-credentials = ee.ServiceAccountCredentials(service_account, EARTHENGINE_TOKEN)
-ee.Initialize(credentials)
+
+
+def init_page():
+    data=pd.DataFrame({'latitude':[48.91405555630452,
+                               48.91383839293139,
+                               48.90254454829243,
+                               48.91405555630452],
+                   'longitude':[-1.5749111956249313,
+                                -1.5574466694862161,
+                                -1.575238569119885,
+                                -1.5749111956249313]})
+
+    st.set_page_config(layout="wide")
+    st.title("Pastis")
+    credentials = ee.ServiceAccountCredentials(EARTHENGINE_MAIL, EARTHENGINE_TOKEN)
+    ee.Initialize(credentials)
+
+    map = geemap.Map(zoom=ZOOM_MAP)
+    map.add_basemap("SATELLITE")
+    map.set_center(data['longitude'][0],data['latitude'][0],zoom=ZOOM_MAP)
+    map.add_markers_from_xy(data, x='longitude', y='latitude')
+
+    return map
+
+
+def app(map):
+
+    col1, _, col2, _ = st.columns([3, 0.3, 2, 1])
+
+    with col1:
+        user_pickup_sat_temp = st.text_input('Pickup satellite template','Tour eiffel')
+
+    with col2:
+        opacity = st.slider("Opacity", min_value=0.0, max_value=1.0,
+                            value=0.8, step=0.05)
+
+
+    landsat = os.path.join(TEST_SAT_IMG,'TARGET_10015.npy')
+    map.add_raster(landsat, bands=[5, 4, 3], layer_name='Landsat')
+
+
+    if st.button('click me for prediction'):
+        #Map.remove_drawn_features()
+        print ('You click ! ')
+        lat,lon= get_coordinates(user_pickup_sat_temp)
+        new_coordinate=(lat,lon)
+
+        map.set_center(lon,lat,zoom=ZOOM_MAP)
+
+        map.add_marker(new_coordinate, popup=user_pickup_sat_temp)
+        map.addLayer(ee_object, vis_params, name, shown, opacity)
+    # Render the map using streamlit
+
+    map.to_streamlit()
+
+
+##############################################################################""
+
+map= init_page()
+app(map)

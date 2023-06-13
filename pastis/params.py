@@ -1,5 +1,7 @@
 import os
 
+TEST_SAT_IMG= os.getenv("TEST_SAT_IMG")
+
 DATA_PATH = os.getenv("DATA_PATH")
 
 # Metadata path
@@ -40,3 +42,4 @@ LABEL_NAMES = {
 
 EARTHENGINE_TOKEN= os.getenv("EARTHENGINE_TOKEN")
 EARTHENGINE_MAIL= os.getenv("EARTHENGINE_MAIL")
+ZOOM_MAP=14
