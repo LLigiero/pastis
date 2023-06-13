@@ -124,7 +124,7 @@ def evaluate_unet_clstm(name_model='20230613-065205_unet_convlstm_suite.h5'):
     save_results(metrics)
 
 
-def predict_model_unet(X_new,name_model=None):
+def predict_model_unet(X_new,name_model='20230612-113429_baseline_aout.h5'):
     """
     X_new=numpy array with correct shape(10, 128,128) or (128,128,10)
     Make a prediction using the latest Unet trained model
@@ -159,9 +159,46 @@ def predict_model_unet(X_new,name_model=None):
 
 
 
+def predict_model_unet_clstm(X_new,name_model='20230613-065205_unet_convlstm_suite.h5'):
+    """
+    X_new=numpy array with correct shape(10, 128,128) or (128,128,10)
+    Make a prediction using the latest Unet trained model
+    Output: np.array (128,128) if ok; str if error
+    """
+    # Instantiate Model
+    unet_clstm = UNetConvLSTMModel()
+
+    model_load = load_model_from_name_h5(name_model)
+    weights = model_load.get_weights()
+    unet_clstm.model.set_weights(weights)
+    assert unet_clstm.model is not None
+
+    if X_new.shape[1:] == (128,128,10):
+        X_new_processed= normalize_patch_spectra(X_new)
+        X_new_processed = pad_time_series(X_new_processed, TIME_SERIES_LENGTH)
+        X_new_processed = np.expand_dims(X_new_processed, axis=0)
+        y_pred = unet_clstm.model.predict(X_new_processed)
+        y_pred = np.argmax(y_pred[0], axis=2)
+        return y_pred
+
+    if X_new.shape[1:] == (10,128,128):
+        X_new = X_new.swapaxes(1, 3).swapaxes(1, 2)
+        X_new_processed= normalize_patch_spectra(X_new)
+        X_new_processed = pad_time_series(X_new_processed, TIME_SERIES_LENGTH)
+        X_new_processed = np.expand_dims(X_new_processed, axis=0)
+        y_pred = unet_clstm.model.predict(X_new_processed)
+        y_pred = np.argmax(y_pred[0], axis=2)
+        return y_pred
+
+    return 'Please verify input shape'
+
 
 
 if __name__ == '__main__':
-    train_baseline()
-    train_unet_clstm()
+    #train_baseline()
+    #evaluate_unet()
+    #predict_model_unet()
+    #train_unet_clstm()
     evaluate_unet_clstm()
+    #predict_model_unet_clstm()
+    #train_unet_clstm_radar()
