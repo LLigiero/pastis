@@ -55,22 +55,26 @@ def root():
 @app.get("/image")
 def get_input_output_image(
     latitude:str,
-    longitude:str
+    longitude:str,
+    time_serie:bool,
+    start_date:str,
+    end_date:str
     ):
     """
     Returns the input and predicted images in np.ndarray format
     """
-
     params ={
         'lat':float(latitude),
         'lon':float(longitude)
         }
 
-    _in = gee_to_numpy_array(params)
-    _out = predict_model_unet(_in, name_model='20230612-113429.h5')
+    name_model='20230612-113429.h5'
+
+    _in = gee_to_numpy_array(params, time_serie, start_date, end_date)
+    #_out = predict_model_unet(_in, name_model)
 
     return {'patch': json.dumps(_in.tolist()),
-            'pred' :  json.dumps(_out.tolist())}
+            'pred' :  ''}
 
     # return {'patch': json.dumps(_in.tolist()),
     #         'pred' : json.dumps(_out.tolist())}
