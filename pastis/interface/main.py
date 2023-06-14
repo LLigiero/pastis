@@ -161,7 +161,8 @@ def predict_model_unet(X_new,name_model='20230612-113429_baseline_aout.h5'):
 
 def predict_model_unet_clstm(X_new,name_model='20230613-065205_unet_convlstm_suite.h5'):
     """
-    X_new=numpy array with correct shape(10, 128,128) or (128,128,10)
+    TIME SERIES LENGH = 61 for this model
+    X_new=numpy array with correct shape(:,10, 128,128) or (:,128,128,10)
     Make a prediction using the latest Unet trained model
     Output: np.array (128,128) if ok; str if error
     """
@@ -174,17 +175,19 @@ def predict_model_unet_clstm(X_new,name_model='20230613-065205_unet_convlstm_sui
     assert unet_clstm.model is not None
 
     if X_new.shape[1:] == (128,128,10):
+        X_new = X_new.swapaxes(1, 3).swapaxes(2, 3)
         X_new_processed= normalize_patch_spectra(X_new)
         X_new_processed = pad_time_series(X_new_processed, TIME_SERIES_LENGTH)
+        X_new_processed = X_new_processed.swapaxes(1, 3).swapaxes(1, 2)
         X_new_processed = np.expand_dims(X_new_processed, axis=0)
         y_pred = unet_clstm.model.predict(X_new_processed)
         y_pred = np.argmax(y_pred[0], axis=2)
         return y_pred
 
     if X_new.shape[1:] == (10,128,128):
-        X_new = X_new.swapaxes(1, 3).swapaxes(1, 2)
         X_new_processed= normalize_patch_spectra(X_new)
         X_new_processed = pad_time_series(X_new_processed, TIME_SERIES_LENGTH)
+        X_new_processed = X_new_processed.swapaxes(1, 3).swapaxes(1, 2)
         X_new_processed = np.expand_dims(X_new_processed, axis=0)
         y_pred = unet_clstm.model.predict(X_new_processed)
         y_pred = np.argmax(y_pred[0], axis=2)

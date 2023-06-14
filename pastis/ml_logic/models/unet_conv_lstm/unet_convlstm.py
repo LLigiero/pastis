@@ -53,7 +53,7 @@ class UNetConvLSTMModel:
         decoder_output = _decoder(skip_connections[::-1], clstm_output)
         output = Conv2D(NUM_CLASSES, kernel_size=(1, 1), activation='softmax')(decoder_output)
         self.model = Model(inputs=inputs, outputs=output)
-        self.model.summary()
+        #self.model.summary()
 
         print("✅ U-net_ConvLSTM Model initialized")
 
