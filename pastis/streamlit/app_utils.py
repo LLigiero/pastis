@@ -1,22 +1,19 @@
 from matplotlib import cm, colors
 import requests
 import ee
-import os
-import numpy as np
 
-from folium import Map, TileLayer, raster_layers, CircleMarker
+from folium import Map, TileLayer, raster_layers, CircleMarker, LatLngPopup, Marker
 
-from pastis.params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL, ZOOM_MAP, TEST_SAT_IMG
+from pastis.params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL, ZOOM_MAP
 
 def app_init():
     #st.set_page_config(layout="wide")
     credentials = ee.ServiceAccountCredentials(EARTHENGINE_MAIL, EARTHENGINE_TOKEN)
     ee.Initialize(credentials)
 
-def print_map(polygon):
-    # start_coordinates = (48.91405555630452,-1.5749111956249313)# S2_100015 first coordinate
-
-    m = Map(location=[polygon['latitude'][0],polygon['longitude'][0]], zoom_start=ZOOM_MAP)
+def map_init():
+    m = Map(location=(47.78530809282205, 2.6266160414864257), zoom_start=6)
+    m.add_child(LatLngPopup())
     TileLayer(
         tiles = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         attr = 'Esri',
@@ -24,19 +21,26 @@ def print_map(polygon):
         overlay = False,
         control = True
         ).add_to(m)
+    return m
+
+
+def update_map(coordinate, polygon,target):
+    print (f'polygon_in_update={polygon}')
+    m_=map_init()
+    Marker(coordinate, tooltip='Le Wagon Paris').add_to(m_)
     raster_layers.ImageOverlay(
-            image=np.load(os.path.join(TEST_SAT_IMG,'TARGET_10015.npy')),
+            image=target,
             bounds=[[polygon['latitude'][0], polygon['longitude'][0]],
                     [polygon['latitude'][2], polygon['longitude'][2]]],
-            colormap=semantic_cmap()).add_to(m)
-
+            opacity=0.5,
+            colormap=semantic_cmap()).add_to(m_)
 
     for i in range(len(polygon)):
         CircleMarker(location=[polygon['latitude'][i], polygon['longitude'][i]],
                         radius=2,
-                        weight=5).add_to(m)
+                        weight=5).add_to(m_)
 
-    return m
+    return m_
 
 def get_coordinates(address):
     url = "https://nominatim.openstreetmap.org/search"
@@ -47,7 +51,7 @@ def get_coordinates(address):
     response = requests.get(url, params=params).json()
     return (response[0]['lat'], response[0]['lon'])
 
-def get_square_dict(coordinates):
+def get_square_dict(coordinates): #coordinates = Tuple de float (lat,lon)
     square_dict={'latitude':[],
         'longitude':[]}
 
