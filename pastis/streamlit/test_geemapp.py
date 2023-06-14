@@ -8,7 +8,6 @@ from pastis.params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL, TEST_SAT_IMG, ZOO
     # - **Web App:** <https://gishub.org/geemap-apps>
     # - **Github:** <https://github.com/giswqs/geemap-apps>
 
-start_coordinates=(48.91405555630452,-1.5749111956249313)# S2_100015 first coordinate
 
 
 def get_coordinates(address):
@@ -19,7 +18,6 @@ def get_coordinates(address):
     }
     response = requests.get(url, params=params).json()
     return (response[0]['lat'], response[0]['lon'])
-
 
 
 def init_page():
@@ -58,7 +56,7 @@ def app(map):
 
 
     landsat = os.path.join(TEST_SAT_IMG,'TARGET_10015.npy')
-    map.add_raster(landsat, bands=[5, 4, 3], layer_name='Landsat')
+    # map.add_raster(landsat, bands=[5, 4, 3], layer_name='Landsat')
 
 
     if st.button('click me for prediction'):
@@ -70,7 +68,7 @@ def app(map):
         map.set_center(lon,lat,zoom=ZOOM_MAP)
 
         map.add_marker(new_coordinate, popup=user_pickup_sat_temp)
-        map.addLayer(ee_object, vis_params, name, shown, opacity)
+
     # Render the map using streamlit
 
     map.to_streamlit()
