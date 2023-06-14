@@ -227,7 +227,7 @@ def process_path_multimodal(
 
 
 # call google earth engine api to convert in S2 data
-def gee_to_numpy_array(params:dict) -> np.ndarray:
+def gee_to_numpy_array(params:dict, time_serie=False, startDate='2019-01-01', endDate ='2019-12-31') -> np.ndarray:
     """ Given an input of lat and lon, generates a picture of geometry size similar to our S2 data.
     Return the corresponding np.array
     """
@@ -242,22 +242,49 @@ def gee_to_numpy_array(params:dict) -> np.ndarray:
     areaM2 = 1280*1280
     square = point.buffer(ee.Number(areaM2).sqrt().divide(2), 1).bounds()
 
-    # step 2 : generate image
-    #Deffining images to be used for Snetinell (s2) collection
-    startDate = '2023-04-01'
-    endDate = '2023-06-01'
+    # step 2 : generate image from COPERNICUS/S2
+    bands=['B2', 'B3', 'B4','B5', 'B6', 'B7','B8','B8A', 'B11', 'B12']
+
     s2 = ee.ImageCollection('COPERNICUS/S2_HARMONIZED').filterDate(startDate, endDate)\
         .filterBounds(square).filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 5))\
-        .sort('CLOUDY_PIXEL_PERCENTAGE', False)
-    #firts image from collection and only 10bands for pastis
-    image = s2.first()
-    image = image.select(['B2', 'B3', 'B4','B5', 'B6', 'B7','B8','B8A', 'B11', 'B12'])
-    #get projection for 10x10m pixel and resample
-    proj_10m = image.select('B2').projection()
-    img = image.resample('bilinear').reproject(proj_10m)
+        .select(bands)
 
-    # step 3 : convert image to np.array to use for image show and prediction
-    image_np = geemap.ee_to_numpy(img, region = square)
-    image_np = image_np[:128,:128,:] #assert shape (128,128,10)
+    if not time_serie:
+        # select first image from collection and only 10bands for pastis
+        image = s2.first()
+        # Get the number of images in the collection
+        size = image.size().getInfo()
+        print(f'Number of images in the collection : {size}')
 
-    return image_np
+        #get projection for 10x10m pixel and resample
+        proj_10m = image.select('B2').projection()
+        img = image.resample('bilinear').reproject(proj_10m)
+
+        # step 3 : convert image to np.array to use for image show and prediction
+        image_np = geemap.ee_to_numpy(img, region = square)
+        image_np = image_np[:128,:128,:] #assert shape (128,128,10)
+
+        return image_np
+
+    else:
+        # Get the number of images in the collection
+        size = s2.size().getInfo()
+        print(f'Number of images in the collection : {size}')
+
+        #get projection for 10x10m pixel and map
+        proj_10m = s2.first().select('B2').projection()
+        s2 = s2.map(lambda image : image.resample('bilinear').reproject(proj_10m))
+        s2 = s2.map(lambda image : image.clip(square.buffer(30)))
+
+        # iterate through image list to reshape in proper format (size x 128 x128 x10)
+        s2_list = s2.toList(s2.size())
+        list_img = []
+
+        for i in range(size):
+            img = ee.Image(s2_list.get(i))
+            image_np = geemap.ee_to_numpy(img, region=square)
+            image_np = image_np[:128,:128,:]
+            list_img.append(image_np)
+
+        return np.array(list_img)
+

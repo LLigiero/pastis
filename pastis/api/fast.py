@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pastis.ml_logic.models.unet_baseline.baseline_model import Unet_baseline
 from pastis.ml_logic.models.registry import load_model_from_name_h5
 from pastis.ml_logic.utils import gee_to_numpy_array
-from pastis.interface.main import predict_model_unet
+from pastis.interface.main import predict_model_unet, predict_model_unet_clstm
 from pastis.params import *
 
 
@@ -52,25 +52,33 @@ def root():
     return {'Prediction' : 'Give me more pastis, bro'}
 
 # return input and output image of type np.ndarray
-@app.get("/image")
+@app.get("/predict")
 def get_input_output_image(
     latitude:str,
-    longitude:str
+    longitude:str,
+    time_serie:bool,
+    start_date:str,
+    end_date:str,
     ):
     """
     Returns the input and predicted images in np.ndarray format
     """
-
     params ={
         'lat':float(latitude),
         'lon':float(longitude)
         }
 
-    _in = gee_to_numpy_array(params)
-    _out = predict_model_unet(_in, name_model='20230612-113429.h5')
+    _in = gee_to_numpy_array(params, time_serie, start_date, end_date)
+
+    if not time_serie :
+        name_model='20230612-113429.h5'
+        _out = predict_model_unet(_in, name_model)
+    else:
+        name_model='20230613-065205_unet_convlstm_suite.h5'
+        _out = predict_model_unet_clstm(_in, name_model)
 
     return {'patch': json.dumps(_in.tolist()),
-            'pred' :  json.dumps(_out.tolist())}
+            'pred' : json.dumps(_out.tolist())}
 
     # return {'patch': json.dumps(_in.tolist()),
     #         'pred' : json.dumps(_out.tolist())}
