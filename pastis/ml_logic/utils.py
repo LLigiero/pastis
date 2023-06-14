@@ -254,7 +254,6 @@ def gee_to_numpy_array(params:dict, time_serie=False, startDate='2019-01-01', en
         size = image.size().getInfo()
         print(f'Number of images in the collection : {size}')
 
-<<<<<<< HEAD
         #get projection for 10x10m pixel and resample
         proj_10m = image.select('B2').projection()
         img = image.resample('bilinear').reproject(proj_10m)
@@ -286,7 +285,3 @@ def gee_to_numpy_array(params:dict, time_serie=False, startDate='2019-01-01', en
             list_img.append(image_np)
 
         return np.array(list_img)
-=======
-    return image_np
-
->>>>>>> master
