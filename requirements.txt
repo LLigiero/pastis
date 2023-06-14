@@ -15,6 +15,12 @@ seaborn
 scikit-learn
 tensorflow==2.10
 geopandas
-# website
+
+#FastAPI
+fastapi
+geemap
+earthengine-api
+
+#Streamlit
 streamlit
 requests

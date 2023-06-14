@@ -6,16 +6,17 @@ DATA_PATH = os.getenv("DATA_PATH")
 
 # Metadata path
 META_PATH = os.path.join(DATA_PATH, "metadata.geojson")
-
 SAVE_PATH = os.getenv("SAVE_PATH")
+
+#API
+EARTHENGINE_MAIL=os.getenv("EARTHENGINE_MAIL")
+EARTHENGINE_TOKEN=os.getenv("EARTHENGINE_TOKEN")
+
 
 # Model csv metrics
 CSV_PATH = os.path.join(SAVE_PATH, 'csv')
-
 TIME_SERIES_LENGTH = 61
-
 FOLDS = {"train": [1, 2, 3], "val": [4], "test": [5]}  # or None to use whole data
-
 NUM_CLASSES = 20
 LABEL_NAMES = {
     "0": "Background",
