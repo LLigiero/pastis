@@ -126,7 +126,7 @@ def evaluate_unet_clstm(name_model='20230613-065205_unet_convlstm_suite.h5'):
 
 def predict_model_unet(X_new,name_model='20230612-113429_baseline_aout.h5'):
     """
-    X_new=numpy array with correct shape(10, 128,128) or (128,128,10)
+    X_new=numpy array with correct shape(128,128,10) or (10,128,128)
     Make a prediction using the latest Unet trained model
     Output: np.array (128,128) if ok; str if error
     """
