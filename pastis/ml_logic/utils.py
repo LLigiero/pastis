@@ -216,11 +216,13 @@ def process_path_multimodal(
     target_semantic = np.load(f"{DATA_PATH}/ANNOTATIONS/TARGET_{patch_id}.npy")[0]
     target_semantic_hot = one_hot(target_semantic, NUM_CLASSES)
 
-    x_radar = tf.convert_to_tensor(x_radar.astype(np.float32))
-    x_opt = tf.convert_to_tensor(x_opt.astype(np.float32))
+    x = np.concatenate([x_opt,x_radar], axis=-1)
+    x = tf.convert_to_tensor(x.astype(np.float32))
+    #x_radar = tf.convert_to_tensor(x_radar.astype(np.float32))
+    #x_opt = tf.convert_to_tensor(x_opt.astype(np.float32))
     y = tf.convert_to_tensor(target_semantic_hot.astype(np.uint8))
 
-    return x_opt, x_radar, y
+    return x, y
 
 
 
@@ -259,4 +261,3 @@ def gee_to_numpy_array(params:dict) -> np.ndarray:
     image_np = image_np[:128,:128,:] #assert shape (128,128,10)
 
     return image_np
-

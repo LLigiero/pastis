@@ -123,6 +123,25 @@ def evaluate_unet_clstm(name_model='20230613-065205_unet_convlstm_suite.h5'):
     metrics = unet_clstm.evaluate_model(pastis.test_dataset)
     save_results(metrics)
 
+def evaluate_unet_clstm_radar(name_model=''):
+
+    # Instantiate class instance
+    print("Initial data")
+    pastis = PastisDataset_Multimodal()
+    print("tfds object is ready ")
+
+    # Instantiate Model
+    unet_clstm_multi = UNetConvLSTMModel_Multimodal()
+    assert unet_clstm_multi.model is not None
+
+    #load model
+    model_load = load_model_from_name_h5(name_model)
+    weights = model_load.get_weights()
+    unet_clstm_multi.model.set_weights(weights)
+
+    metrics = unet_clstm_multi.evaluate_model(pastis.test_dataset)
+    save_results(metrics)
+
 
 def predict_model_unet(X_new,name_model='20230612-113429_baseline_aout.h5'):
     """
