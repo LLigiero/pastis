@@ -123,7 +123,7 @@ def evaluate_unet_clstm(name_model='20230613-065205_unet_convlstm_suite.h5'):
     metrics = unet_clstm.evaluate_model(pastis.test_dataset)
     save_results(metrics)
 
-def evaluate_unet_clstm_radar(name_model=''):
+def evaluate_unet_clstm_radar(name_model='20230615-113335_unet_convlstm_multimodal.h5'):
 
     # Instantiate class instance
     print("Initial data")
