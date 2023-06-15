@@ -26,6 +26,8 @@ run_unet_convlstm_eval:
 run_unet_convlstm_radar_train:
 	python -c 'from pastis.interface.main import train_unet_clstm_radar; train_unet_clstm_radar()'
 
+run_unet_convlstm_radar_eval:
+	python -c 'from pastis.interface.main import evaluate_unet_clstm_radar; evaluate_unet_clstm_radar()'
 
 reset_local_files :
 	rm -rf raw_data

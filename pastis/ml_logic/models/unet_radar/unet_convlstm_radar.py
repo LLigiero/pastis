@@ -106,7 +106,7 @@ class UNetConvLSTMModel_Multimodal:
     def fit_model(
             self,
             train_ds,
-            epochs=25,
+            epochs=30,
             batch_size=2,
             patience=5,
             validation_ds=None,
