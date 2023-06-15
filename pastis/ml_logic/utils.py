@@ -274,7 +274,7 @@ def gee_to_numpy_array(params:dict, time_serie=False, startDate='2019-01-01', en
         #get projection for 10x10m pixel and map
         proj_10m = s2.first().select('B2').projection()
         s2 = s2.map(lambda image : image.resample('bilinear').reproject(proj_10m))
-        s2 = s2.map(lambda image : image.clip(square.buffer(30)))
+        #s2 = s2.map(lambda image : image.clip(square.buffer(50)))
 
         # iterate through image list to reshape in proper format (size x 128 x128 x10)
         s2_list = s2.toList(s2.size())
@@ -287,4 +287,3 @@ def gee_to_numpy_array(params:dict, time_serie=False, startDate='2019-01-01', en
             list_img.append(image_np)
 
         return np.array(list_img)
-

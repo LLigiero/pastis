@@ -151,6 +151,8 @@ def predict_model_unet(X_new,name_model='20230612-113429_baseline_aout.h5'):
     """
     # Instantiate Model
     unet_baseline = Unet_baseline()
+    #unet_clstm = UNetConvLSTMModel()
+
 
     #load model
     model_load = load_model_from_name_h5(name_model)

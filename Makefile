@@ -29,6 +29,13 @@ run_unet_convlstm_radar_train:
 run_unet_convlstm_radar_eval:
 	python -c 'from pastis.interface.main import evaluate_unet_clstm_radar; evaluate_unet_clstm_radar()'
 
+run_api:
+	uvicorn pastis.api.fast:app --reload
+
+run_streamlit:
+	streamlit run pastis/streamlit/app.py
+
+
 reset_local_files :
 	rm -rf raw_data
 	mkdir raw_data

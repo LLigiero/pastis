@@ -8,7 +8,7 @@ from pastis.ml_logic.models.registry import load_model_from_name_h5
 from pastis.ml_logic.utils import gee_to_numpy_array
 from pastis.interface.main import predict_model_unet, predict_model_unet_clstm
 from pastis.params import *
-
+from pastis.api.test import res
 
 # run API: uvicorn pastis.api.fast:app --reload
 app = FastAPI()
@@ -77,8 +77,13 @@ def get_input_output_image(
         name_model='20230613-065205_unet_convlstm_suite.h5'
         _out = predict_model_unet_clstm(_in, name_model)
 
+    print ("Send data DONE")
     return {'patch': json.dumps(_in.tolist()),
             'pred' : json.dumps(_out.tolist())}
 
     # return {'patch': json.dumps(_in.tolist()),
     #         'pred' : json.dumps(_out.tolist())}
+
+@app.get("/predict_test")
+async def test_front():
+    return {'pred' : res}
