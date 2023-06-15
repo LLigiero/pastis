@@ -58,7 +58,7 @@ def semantic_cmap()-> object:
         Return an object which contains the 20 colors needed.'''
     c_m = cm.get_cmap('tab20')
     def_colors = c_m.colors
-    cus_colors = ['k'] + [def_colors[i] for i in range(1,20)] + ['w']
+    cus_colors = ['#00000010'] + [def_colors[i] for i in range(1,20)] + ['w']
     semantic_cmap = colors.ListedColormap(colors = cus_colors, name='agri',N=21)
 
     return semantic_cmap

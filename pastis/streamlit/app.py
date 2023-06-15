@@ -35,7 +35,7 @@ if predict_button:
     params={
     'latitude': lat , 'longitude': lon,
     'time_serie': True,
-    'start_date': '2019-05-01',
+    'start_date': '2018-05-01',
     'end_date': '2019-09-01'}
 
     predict = requests.get(url,params).json()
@@ -51,7 +51,7 @@ if predict_button:
             image=target,
             bounds=[[polygon['latitude'][0], polygon['longitude'][0]],
                     [polygon['latitude'][2], polygon['longitude'][2]]],
-            opacity=0.5,
+            opacity=0.8,
             colormap=semantic_cmap())
 
     # st.session_state["markers"].append(marker)
