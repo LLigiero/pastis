@@ -1,0 +1,30 @@
+# tests
+pytest
+pylint
+# debug
+ipdb
+# Notebooks
+jupyterlab
+# base packages
+numpy
+pandas
+colorama
+# data-viz
+matplotlib
+seaborn
+# data-science
+scikit-learn
+keras
+tensorflow==2.10
+geopandas
+# Google
+google-cloud-storage
+
+#FastAPI
+fastapi
+geemap
+earthengine-api
+
+#Streamlit
+streamlit
+requests
