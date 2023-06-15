@@ -2,56 +2,41 @@ from matplotlib import cm, colors
 import requests
 import ee
 
-from folium import Map, TileLayer, raster_layers, CircleMarker, LatLngPopup, Marker
-
-from pastis.params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL, ZOOM_MAP
+from pastis.params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL
 
 def app_init():
     #st.set_page_config(layout="wide")
     credentials = ee.ServiceAccountCredentials(EARTHENGINE_MAIL, EARTHENGINE_TOKEN)
     ee.Initialize(credentials)
 
-def map_init():
-    m = Map(location=(47.78530809282205, 2.6266160414864257), zoom_start=6)
-    m.add_child(LatLngPopup())
-    TileLayer(
-        tiles = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        attr = 'Esri',
-        name = 'Esri Satellite',
-        overlay = False,
-        control = True
-        ).add_to(m)
-    return m
 
-
-def update_map(coordinate, polygon,target):
-    print (f'polygon_in_update={polygon}')
-    m_=map_init()
-    Marker(coordinate, tooltip='Le Wagon Paris').add_to(m_)
-    raster_layers.ImageOverlay(
-            image=target,
-            bounds=[[polygon['latitude'][0], polygon['longitude'][0]],
-                    [polygon['latitude'][2], polygon['longitude'][2]]],
-            opacity=0.5,
-            colormap=semantic_cmap()).add_to(m_)
-
-    for i in range(len(polygon)):
-        CircleMarker(location=[polygon['latitude'][i], polygon['longitude'][i]],
-                        radius=2,
-                        weight=5).add_to(m_)
-
-    return m_
-
-def get_coordinates(address):
+def get_coordinates(address:str)->tuple:
+    ''' Give an adress or coordinate
+        Return the coordinate unfer format (lat,lon)'''
     url = "https://nominatim.openstreetmap.org/search"
     params = {
         'q': address,
         'format': 'json'
     }
     response = requests.get(url, params=params).json()
+
     return (response[0]['lat'], response[0]['lon'])
 
-def get_square_dict(coordinates): #coordinates = Tuple de float (lat,lon)
+
+def get_square_dict(coordinates:tuple)->dict:
+    ''' Need execute the app_init() before use it, to authenticate in the API
+
+        Function to request the Google Earth Engine (with tuple of
+        coordinates (lat,lon))
+
+        GEE give 5 coordinates which represents the square of the zone which
+        will be determine square
+
+        Return a dictionnary:
+           { 'latitude': [list of latitude],
+             'longitude': [list of longitude] }'''
+
+
     square_dict={'latitude':[],
         'longitude':[]}
 
@@ -67,9 +52,13 @@ def get_square_dict(coordinates): #coordinates = Tuple de float (lat,lon)
 
     return(square_dict)
 
-def semantic_cmap():
+
+def semantic_cmap()-> object:
+    ''' Function which create the same color legend of Pastis project
+        Return an object which contains the 20 colors needed.'''
     c_m = cm.get_cmap('tab20')
     def_colors = c_m.colors
     cus_colors = ['k'] + [def_colors[i] for i in range(1,20)] + ['w']
     semantic_cmap = colors.ListedColormap(colors = cus_colors, name='agri',N=21)
+
     return semantic_cmap

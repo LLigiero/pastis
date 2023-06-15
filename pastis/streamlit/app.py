@@ -6,9 +6,6 @@ import json
 
 import folium
 
-import time
-timestamp = time.strftime("%H:%M:%S")
-
 app_init()
 user_pickup_sat_temp = st.text_input('Pickup satellite template','48.60024167842473 -1.341984802380476')
 predict_button=st.button('click me for prediction')
@@ -25,13 +22,9 @@ if "markers" not in st.session_state:
 
 
 if predict_button:
-    print (f'\n{timestamp}_You click ! \n')
     lon, lat= get_coordinates(user_pickup_sat_temp)
-    print (f'lontitude={lon}')
-    print (f'latitude={lat}')
-    # Generate the polygon where my target will be display on map
+    # Generate the polygon where the target will be display on map
     polygon=get_square_dict((float(lat),float(lon)))
-    print (f'polygon={polygon}')
 
     #url = 'http://127.0.0.1:8000/predict_test'
     # predict = requests.get(url).json()
@@ -52,7 +45,7 @@ if predict_button:
     #     popup=f"Random marker at {float(lat):.2f}, {float(lon):.2f}",
     # )
 
-    add_pred = raster_layers.ImageOverlay(
+    add_pred = folium.raster_layers.ImageOverlay(
             image=target,
             bounds=[[polygon['latitude'][0], polygon['longitude'][0]],
                     [polygon['latitude'][2], polygon['longitude'][2]]],
@@ -70,8 +63,8 @@ if predict_button:
 m = folium.Map(
     location=st.session_state["center"], zoom_start=st.session_state["zoom"]
 )
-m.add_child(LatLngPopup())
-TileLayer(
+m.add_child(folium.LatLngPopup())
+folium.TileLayer(
     tiles = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attr = 'Esri',
     name = 'Esri Satellite',
