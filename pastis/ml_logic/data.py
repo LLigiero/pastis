@@ -70,18 +70,18 @@ class PastisDataset_Multimodal:
         self.train_dataset = tf.data.Dataset.list_files(files_list["train"])
         self.train_dataset = self.train_dataset.map(
             lambda path: tf.py_function(
-                process_path_multimodal, inp=[path, mono_date], Tout=[tf.float32,tf.float32, tf.uint8]
+                process_path_multimodal, inp=[path, mono_date], Tout=[tf.float32, tf.uint8]
             )
         )
         self.val_dataset = tf.data.Dataset.list_files(files_list["val"])
         self.val_dataset = self.val_dataset.map(
             lambda path: tf.py_function(
-                process_path_multimodal, inp=[path, mono_date], Tout=[tf.float32,tf.float32, tf.uint8]
+                process_path_multimodal, inp=[path, mono_date], Tout=[tf.float32, tf.uint8]
             )
         )
         self.test_dataset = tf.data.Dataset.list_files(files_list["test"])
         self.test_dataset = self.test_dataset.map(
             lambda path: tf.py_function(
-                process_path_multimodal, inp=[path, mono_date], Tout=[tf.float32,tf.float32, tf.uint8]
+                process_path_multimodal, inp=[path, mono_date], Tout=[tf.float32, tf.uint8]
             )
         )

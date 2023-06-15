@@ -28,7 +28,10 @@ class UNetConvLSTMModel_Multimodal:
         # self.model.compile()
 
     def build_model(self):
-        inputs_opt = Input(shape=(TIME_SERIES_LENGTH, 128, 128, 10))
+
+        inputs = Input(shape=(TIME_SERIES_LENGTH, 128, 128, 13))
+        inputs_opt, inputs_radar = Lambda(lambda tt: (tt[:,:,:,:,:10], tt[:,:,:,:,10:]))(inputs)
+        #inputs_opt = Input(shape=(TIME_SERIES_LENGTH, 128, 128, 10))
         initializer = keras.random_normal_initializer(0., 0.02)
         encoder_filters = [16, 32, 32, 64]
 
@@ -46,7 +49,7 @@ class UNetConvLSTMModel_Multimodal:
             x = LeakyReLU()(x)
             skip_connections_opt.append(x)
 
-        inputs_radar = Input(shape=(TIME_SERIES_LENGTH, 128, 128, 3))
+        #inputs_radar = Input(shape=(TIME_SERIES_LENGTH, 128, 128, 3))
 
         # Encoder
         encoder_radar = _encoder_radar(filters=encoder_filters)
@@ -71,7 +74,8 @@ class UNetConvLSTMModel_Multimodal:
         # Decoder
         decoder_output = _decoder_radar(skip_connections_opt[::-1],skip_connections_radar[::-1], clstm_output)
         output = Conv2D(NUM_CLASSES, kernel_size=(1, 1), activation='softmax')(decoder_output)
-        self.model = Model(inputs=[inputs_opt,inputs_radar], outputs=output)
+        self.model = Model(inputs=inputs, outputs=output)
+        #self.model = Model(inputs=[inputs_opt,inputs_radar], outputs=output)
         #self.model.summary()
 
         print("✅ U-net_ConvLSTM Multimodal Model initialized")
@@ -102,9 +106,9 @@ class UNetConvLSTMModel_Multimodal:
     def fit_model(
             self,
             train_ds,
-            epochs=1,
-            batch_size=4,
-            patience=1,
+            epochs=25,
+            batch_size=2,
+            patience=5,
             validation_ds=None,
 
         ) -> tuple[Model]:
@@ -156,3 +160,26 @@ class UNetConvLSTMModel_Multimodal:
 
 
     # ----- EVALUATE MODEL -----
+
+    def evaluate_model(
+            self,
+            test_ds,
+            verbose=0,
+            batch_size=2,
+            return_dict=True
+        ) -> tuple[Model, dict]:
+        """
+        Evaluate trained model performance on the test dataset
+        """
+        self.metrics = self.model.evaluate(
+            test_ds.batch(batch_size),
+            verbose=0,
+            # callbacks=None,
+            return_dict=return_dict
+        )
+        print(f"✅ Model evaluated with :\n\
+            - Accuracy : {round(self.metrics['acc'],2)} \n\
+            - Mean IuO: {round(self.metrics['mean_iou'],2)}"
+            )
+
+        return self.metrics
