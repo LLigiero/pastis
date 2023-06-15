@@ -1,28 +1,54 @@
 import pandas as pd
+import numpy as np
+import json
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pastis.ml_logic.models.unet_baseline.baseline_model import Unet_baseline
+from pastis.ml_logic.models.unet_conv_lstm.unet_convlstm import UNetConvLSTMModel
 from pastis.ml_logic.models.registry import load_model_from_name_h5
-import numpy as np
+from pastis.ml_logic.utils import gee_to_numpy_array
+from pastis.interface.main import predict_model_unet, predict_model_unet_clstm
+from pastis.params import *
+from contextlib import asynccontextmanager
+from pastis.api.test import res
+
+model={}
+
+@asynccontextmanager
+async def lifespan(app):
+    # Unet_baseline
+    name_model='20230612-113429.h5'
+    model_load = load_model_from_name_h5(name_model)
+    weights = model_load.get_weights()
+    trained_model = Unet_baseline()
+    trained_model.model.set_weights(weights)
+    model['unet'] = trained_model
+
+    # Unet_convlstm
+    name_model='20230613-065205_unet_convlstm_suite.h5'
+    model_load = load_model_from_name_h5(name_model)
+    weights = model_load.get_weights()
+    trained_model = UNetConvLSTMModel(NUM_CLASSES)
+    trained_model.model.set_weights(weights)
+    model['clstm'] = trained_model
+
+    yield
+    model.clear()
 
 # run API: uvicorn pastis.api.fast:app --reload
-app = FastAPI()
+# app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+
 
 ##############################
 ### loading model from GCP ###
 ##############################
 
 ### Instantiate Model
-trained_model = Unet_baseline()
-assert trained_model.model is not None
+# assert trained_model.model is not None
 
 ### Load model
-name_model='20230612-113429.h5'
-model_load = load_model_from_name_h5(name_model)
-weights = model_load.get_weights()
-trained_model.model.set_weights(weights)
-
-app.state.model = load_model_from_name_h5(trained_model)
+ # TO DO: get model from bucket
 
 ##############################
 ##############################
@@ -41,57 +67,44 @@ app.add_middleware(
 params ={'lat':-1.341984802380476,
          'lon':49.60024167842473}
 
-# call google earth engine api to convert in S2 data
-
-def convert_to_numpy_array(params:dict) -> np.array():
-    """ Given an input of lat and lon, generates a picture of geometry size similar to our S2 data.
-    Return the corresponding np.array
-    """
-
-    # step 1 : generates geometry
-    # example: gemoetry = [
-        # [[-1.270332050595563, 49.6353097251849],
-        #  [-1.2526136350202335, 49.635043589013904],
-        #  [-1.2530253544991803, 49.623535818998874],
-        #  [-1.270739600356701, 49.62380184758293],
-        #  [-1.270332050595563, 49.6353097251849]]
-        # ]
-
-    # step 2 : generate image
-
-
-    # step 3 : convert image to np.array to use for image show and prediction
-
-    pass
-
-
 # define a root `/` endpoint
 @app.get("/")
 def root():
-    return {'Prediction' : 'I need more pastis'}
+    return {'Prediction' : 'Give me more pastis, bro'}
 
-# show input image
-@app.get("/input_image")
-def show_input_image(
-    latitude:str,
-    longitude:str
-    ):
-    """
-    Plots the test image
-    """
-
-    return {'Image_input': 'Image np array'}
-
-
-# show prediction
+# return input and output image of type np.ndarray
 @app.get("/predict")
-def predict(
+def get_input_output_image(
     latitude:str,
-    longitude:str
+    longitude:str,
+    time_serie:bool,
+    start_date:str,
+    end_date:str,
     ):
     """
-    Make a 128 x 128 image prediction with classes.
-    Converts latitute and longitude inputs into S2-type data (shape 128x128x10)
+    Returns the input and predicted images in np.ndarray format
     """
+    params ={
+        'lat':float(latitude),
+        'lon':float(longitude)
+        }
 
-    return {'Baseline_prediction': 'I need more pastis'}
+    _in = gee_to_numpy_array(params, time_serie, start_date, end_date)
+
+    if not time_serie :
+        name_model='20230612-113429.h5'
+        _out = predict_model_unet(_in, name_model, model['unet'])
+    else:
+        name_model='20230613-065205_unet_convlstm_suite.h5'
+        _out = predict_model_unet_clstm(_in, name_model, model['clstm'])
+
+    print ("Send data DONE")
+    return {'patch': json.dumps(_in.tolist()),
+            'pred' : json.dumps(_out.tolist())}
+
+    # return {'patch': json.dumps(_in.tolist()),
+    #         'pred' : json.dumps(_out.tolist())}
+
+@app.get("/predict_test")
+async def test_front():
+    return {'pred' : res}

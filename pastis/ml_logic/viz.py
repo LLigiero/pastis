@@ -3,6 +3,7 @@ import numpy as np
 from pastis.params import *
 from matplotlib import cm, colors
 import matplotlib.pyplot as plt
+import pandas as pd
 
 def reshape_patch_spectra(img):
     """Utility function to reshape patch shape from k*128*128 to 128*128*k.
@@ -40,14 +41,27 @@ def get_radar(time_series, t_show=-1):
     radar_image = reshape_patch_spectra(image_normalized)
     return radar_image
 
-def plot_semantic(patch_id):
+def plot_y_pred(y_pred):
     """
-    Utility function to get a displayable rgb image from id_patch
-    of a semantic target.
+    Utility function display y_pred
     """
+    legend = pd.DataFrame.from_dict(LABEL_NAMES, orient='index', columns=['Class Name'])
+    legend = legend.style.applymap_index(lambda v: f"background-color:{apply_color(v)};", axis=0)
     c_m = cm.get_cmap('tab20')
     def_colors = c_m.colors
+    cus_colors = ['k'] + [def_colors[i] for i in range(1,20)] + ['w']
+    semantic_cmap = colors.ListedColormap(colors = cus_colors, name='agri',N=21)
+    plt.imshow(y_pred, cmap= semantic_cmap, vmin=0, vmax=19)
+    plt.title('Prediction')
 
+def plot_semantic(patch_id):
+    """
+    Utility function display semantic target.
+    """
+    legend = pd.DataFrame.from_dict(LABEL_NAMES, orient='index', columns=['Class Name'])
+    legend = legend.style.applymap_index(lambda v: f"background-color:{apply_color(v)};", axis=0)
+    c_m = cm.get_cmap('tab20')
+    def_colors = c_m.colors
     cus_colors = ['k'] + [def_colors[i] for i in range(1,20)] + ['w']
     semantic_cmap = colors.ListedColormap(colors = cus_colors, name='agri',N=21)
 
@@ -55,4 +69,21 @@ def plot_semantic(patch_id):
 
     plt.imshow(target, cmap= semantic_cmap, vmin=0, vmax=19)
     plt.title('Semantic labels')
-    #plt.legend(LABEL_NAMES)
+
+
+def rgb_to_hex(color:tuple(float))->str:
+    """
+    Returne hex color from float_rgb color
+    """
+    r=int(255*color[0])
+    g=int(255*color[1])
+    b=int(255*color[2])
+    return '#{:02x}{:02x}{:02x}'.format(r, g, b)
+
+def apply_color(index):
+    """
+    Returne hex color from float_rgb color
+     """
+    color = COLORS_TABLE[int(index)]
+    hex_color = rgb_to_hex(color)
+    return hex_color

@@ -69,7 +69,7 @@ class Unet_baseline():
 
         # baseline unet
         self.model = Model(inputs, outputs, name='baseline_unet')
-        self.model.summary()
+        #self.model.summary()
 
         print("✅ Model initialized")
 
@@ -92,7 +92,7 @@ class Unet_baseline():
         self.model.compile(loss=loss, optimizer=optimizer, metrics=metrics, run_eagerly=True)
 
         print("✅ Model compiled")
-        print(type(self.model))
+        # print(type(self.model))
 
         return self.model
 
@@ -149,7 +149,7 @@ class Unet_baseline():
             )
         print('-'*50)
 
-        print(type(self.model))
+        # print(type(self.model))
 
         return self.model, self.history
 
