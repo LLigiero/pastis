@@ -2,7 +2,7 @@ from matplotlib import cm, colors
 import requests
 import ee
 
-from pastis.params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL
+from pastis.params import EARTHENGINE_TOKEN, EARTHENGINE_MAIL, DEFAULT_COORDINATES
 
 def app_init():
     #st.set_page_config(layout="wide")

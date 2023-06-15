@@ -7,8 +7,10 @@ import json
 import folium
 
 app_init()
-user_pickup_sat_temp = st.text_input('Pickup satellite template','48.60024167842473 -1.341984802380476')
-predict_button=st.button('click me for prediction')
+
+user_pickup_sat_temp = st.text_input('Adress / Coordinates',DEFAULT_COORDINATES)
+col1, col2,col3 = st.columns(3)
+predict_button=col2.button('click me for prediction',)
 
 
 ##### Init st.session_state
@@ -33,8 +35,8 @@ if predict_button:
     params={
     'latitude': lat , 'longitude': lon,
     'time_serie': True,
-    'start_date': '2019-01-01',
-    'end_date': '2019-03-01'}
+    'start_date': '2019-05-01',
+    'end_date': '2019-09-01'}
 
     predict = requests.get(url,params).json()
     target = np.array(json.loads(predict['pred'])) # y_pred
@@ -79,6 +81,7 @@ for marker in st.session_state["markers"]:
 m.add_child(fg)
 st_folium(
     m,
-    key="old",
+    key="new",
+    feature_group_to_add=fg,
     width=700,
 )

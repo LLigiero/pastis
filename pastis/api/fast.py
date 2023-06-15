@@ -77,6 +77,7 @@ def get_input_output_image(
         name_model='20230613-065205_unet_convlstm_suite.h5'
         _out = predict_model_unet_clstm(_in, name_model)
 
+    print ("Send data DONE")
     return {'patch': json.dumps(_in.tolist()),
             'pred' : json.dumps(_out.tolist())}
 
